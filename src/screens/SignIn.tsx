@@ -36,6 +36,10 @@ const SignIn = ({ navigation }) => {
             console.log('User account signed in!', signInResult.result);
             handleUser(signInResult.result);
             Toast.showWithGravity('Success, User account signed in', Toast.LONG, Toast.TOP);
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Root' }],
+            });
           } else {
             setError('loginInput', { type: 'custom', message: signInResult.error });
           }
