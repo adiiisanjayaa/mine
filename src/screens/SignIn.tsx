@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useState } from 'react';
-import { useTheme } from '../hooks';
+import { useData, useTheme } from '../hooks';
 import { Block, Button, Input, Text } from '../components';
 import { ActivityIndicator, Pressable, StatusBar, StyleSheet } from 'react-native';
 import { useForm } from 'react-hook-form';
@@ -20,6 +20,7 @@ const SignIn = ({ navigation }) => {
     formState: { errors, isValid },
   } = useForm({ mode: 'onBlur' });
   const [isLoading, setLoading] = useState(false);
+  const { handleUser } = useData();
 
   const onSubmit = async (data) => {
     if (isValid) {
@@ -32,6 +33,8 @@ const SignIn = ({ navigation }) => {
           const signInResult = await DoSignIn(data.email, data.password);
           setLoading(false);
           if (signInResult.result != null) {
+            console.log('User account signed in!', signInResult.result);
+            handleUser(signInResult.result);
             Toast.showWithGravity('Success, User account signed in', Toast.LONG, Toast.TOP);
           } else {
             setError('loginInput', { type: 'custom', message: signInResult.error });
@@ -75,6 +78,7 @@ const SignIn = ({ navigation }) => {
             control={control}
             name="password"
             label="Password"
+            secureTextEntry={true}
             placeholder="Enter your Password"
             backgroundColor={colors.secondary}
             marginTop={sizes.spaceInput}

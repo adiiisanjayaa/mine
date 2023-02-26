@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useState } from 'react';
+import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 
 import {
-  IUser,
   IUseData,
   ITheme,
 } from '../constants/types';
@@ -14,11 +14,11 @@ export const DataContext = React.createContext({});
 
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   const [theme, setTheme] = useState<ITheme>(light);
-  const [user, setUser] = useState<IUser>();
+  const [user, setUser] = useState<FirebaseAuthTypes.UserCredential>();
 
   // handle user
   const handleUser = useCallback(
-    (payload: IUser) => {
+    (payload: FirebaseAuthTypes.UserCredential) => {
       // set user / compare if has updated
       if (JSON.stringify(payload) !== JSON.stringify(user)) {
         setUser(payload);

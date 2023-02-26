@@ -33,7 +33,7 @@ const SignUp = ({ navigation }) => {
           const signUpResult = await DoSignUp(data.email, data.password);
           setLoading(false);
           if (signUpResult.result != null) {
-            console.log('User account created & signed in!');
+            console.log('User account created & signed in!', signUpResult.result);
             Toast.showWithGravity('Success, User account created', Toast.LONG, Toast.TOP);
             navigation.pop();
           } else {

@@ -1,27 +1,26 @@
 import {ITheme} from './theme';
+import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 
 export * from './components';
 export * from './theme';
 
-export interface IUser {
-  uid: number | string;
-  name?: string;
-  address?: string;
-  email?: string;
-  website?: string;
-  avatar?: string;
-  backgroundImage?: string;
-}
+// export interface IUser {
+//   uid: number | string;
+//   name?: string;
+//   address?: string;
+//   email?: string;
+//   website?: string;
+//   avatar?: string;
+//   backgroundImage?: string;
+// }
 
 export interface IUseData {
   isDark: boolean;
   handleIsDark: (isDark?: boolean) => void;
   theme: ITheme;
   setTheme: (theme?: ITheme) => void;
-  user: IUser;
-  users: IUser[];
-  handleUser: (data?: IUser) => void;
-  handleUsers: (data?: IUser[]) => void;
+  user: FirebaseAuthTypes.UserCredential;
+  handleUser: (data?: FirebaseAuthTypes.UserCredential) => void;
   notifications: INotification[];
   handleNotifications: (data?: INotification[]) => void;
 }
