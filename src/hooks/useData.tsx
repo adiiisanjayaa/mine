@@ -7,7 +7,6 @@ import {
 } from '../constants/types';
 
 import {
-  USERS,
 } from '../constants/mocks';
 import { light } from '../constants';
 
@@ -15,19 +14,7 @@ export const DataContext = React.createContext({});
 
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   const [theme, setTheme] = useState<ITheme>(light);
-  const [user, setUser] = useState<IUser>(USERS[0]);
-  const [users, setUsers] = useState<IUser[]>(USERS);
-
-  // handle users / profiles
-  const handleUsers = useCallback(
-    (payload: IUser[]) => {
-      // set users / compare if has updated
-      if (JSON.stringify(payload) !== JSON.stringify(users)) {
-        setUsers({ ...users, ...payload });
-      }
-    },
-    [users, setUsers],
-  );
+  const [user, setUser] = useState<IUser>();
 
   // handle user
   const handleUser = useCallback(
@@ -44,8 +31,6 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     theme,
     setTheme,
     user,
-    users,
-    handleUsers,
     handleUser,
   };
 

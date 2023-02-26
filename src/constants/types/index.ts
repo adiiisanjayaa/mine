@@ -4,13 +4,13 @@ export * from './components';
 export * from './theme';
 
 export interface IUser {
-  id: number | string;
+  uid: number | string;
   name?: string;
-  department?: string;
+  address?: string;
+  email?: string;
+  website?: string;
   avatar?: string;
-  stats?: {posts?: number; followers?: number; following?: number};
-  social?: {twitter?: string; dribbble?: string};
-  about?: string;
+  backgroundImage?: string;
 }
 
 export interface IUseData {

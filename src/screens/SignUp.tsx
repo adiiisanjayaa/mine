@@ -4,12 +4,12 @@ import { useTheme } from '../hooks';
 import { Block, Button, Input, Text } from '../components';
 import { Pressable, StatusBar, StyleSheet } from 'react-native';
 import { useForm } from 'react-hook-form';
-import auth from '@react-native-firebase/auth';
 import { ScrollView } from 'react-native-gesture-handler';
 import Toast from 'react-native-simple-toast';
 import { ErrorMessage } from '@hookform/error-message';
 import { ActivityIndicator } from 'react-native';
 import Helper from '../utility/helper';
+import { DoSignUp } from '../lib/firebaseProvider';
 
 const SignUp = ({ navigation }) => {
   const { colors, sizes } = useTheme();
@@ -22,16 +22,27 @@ const SignUp = ({ navigation }) => {
   } = useForm({ mode: 'onBlur' });
   const [isLoading, setLoading] = useState(false);
 
-  const onSubmit = data => {
+  const onSubmit = async (data) => {
     if (isValid) {
       console.log('submited ', data);
       register('registerInput', { minLength: 4 });
       const isEmail = Helper.isValidEmail(data.email);
       if (isEmail) {
         try {
-          DoSignUp(data.email, data.password);
+          setLoading(true);
+          const signUpResult = await DoSignUp(data.email, data.password);
+          setLoading(false);
+          if (signUpResult.result != null) {
+            console.log('User account created & signed in!');
+            Toast.showWithGravity('Success, User account created', Toast.LONG, Toast.TOP);
+            navigation.pop();
+          } else {
+            setError('registerInput', { type: 'custom', message: signUpResult.error });
+          }
         } catch (error) {
-          console.log(error);
+          setError('registerInput', { type: 'custom', message: 'Something went wrong!' });
+          console.error(error);
+          setLoading(false);
         }
       } else {
         setError('registerInput', { type: 'custom', message: 'Email not valid!' });
@@ -39,32 +50,7 @@ const SignUp = ({ navigation }) => {
     }
   };
 
-  const DoSignUp = (email: string,
-    password: string,) => {
-    setLoading(true);
-    auth()
-      .createUserWithEmailAndPassword(email, password)
-      .then(() => {
-        setLoading(false);
-        console.log('User account created & signed in!');
-        Toast.showWithGravity('Success, User account created', Toast.LONG, Toast.TOP);
-        navigation.pop();
-      })
-      .catch(error => {
 
-        if (error.code === 'auth/email-already-in-use') {
-          console.log('That email address is already in use!');
-          setError('registerInput', { type: 'custom', message: 'That email address is already in use!' });
-        } else if (error.code === 'auth/invalid-email') {
-          console.log('That email address is invalid!');
-          setError('registerInput', { type: 'custom', message: 'That email address is invalid!' });
-        } else {
-          setError('registerInput', { type: 'custom', message: 'Something went wrong!' });
-        }
-
-        console.error(error);
-      });
-  };
 
   return (
     <Block color={colors.light} marginTop={StatusBar.currentHeight} style={{ padding: sizes.padding }} >
@@ -114,7 +100,8 @@ const SignUp = ({ navigation }) => {
               p
               color={colors.danger}
               bold
-              lineHeight={30}
+              lineHeight={20}
+              marginTop={10}
               align="left">
               *{message}
             </Text>}
