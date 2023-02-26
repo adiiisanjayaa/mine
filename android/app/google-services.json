@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "980328234837",
+    "project_id": "mine-6fcfb",
+    "storage_bucket": "mine-6fcfb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:980328234837:android:bbaf069be79219ae22f9dc",
+        "android_client_info": {
+          "package_name": "com.mine"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "980328234837-ni1lp7gcn4l88hhm5jih41cmc6gbse53.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mine",
+            "certificate_hash": "ed30b06d359fa583febfdb0b71f1e907f831fafe"
+          }
+        },
+        {
+          "client_id": "980328234837-qcn297oq48v3qph663co7pm5caqfk687.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7UpZV403uvMG7BlCWjeLy-hOcPv6MMo8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "980328234837-qcn297oq48v3qph663co7pm5caqfk687.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
