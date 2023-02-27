@@ -8,9 +8,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { StatusBar, StyleSheet } from 'react-native';
 import { Avatar, ListItem } from 'react-native-elements';
 import { FlatList } from 'react-native-gesture-handler';
+import { useData } from '../hooks';
+
 
 const Home = ({ navigation }) => {
   const { colors, sizes } = useTheme();
+  const { handleUser, user } = useData();
   const DATA = [
     {
       id: Math.random().toString(),
@@ -125,7 +128,10 @@ const Home = ({ navigation }) => {
           renderItem={({ item, index }) => {
             const isEnd = index === DATA.length - 1;
             // eslint-disable-next-line react-native/no-inline-styles
-            return (<ListItem onPress={() => navigation.push('DetailChat')} containerStyle={[styles.itemList, { paddingHorizontal: sizes.padding, paddingTop: 10, paddingBottom: isEnd ? 100 : 10 }]} >
+            return (<ListItem onPress={() => {
+              handleUser({ uid: 'sdf', email: 'sds', address: 'sds', avatar: 'sds', backgroundImage: 'sds', name: 'sds', website: 'sds' });
+              console.log('current user : ', user);
+            }} containerStyle={[styles.itemList, { paddingHorizontal: sizes.padding, paddingTop: 10, paddingBottom: isEnd ? 100 : 10 }]} >
               <Avatar
                 title={item.title}
                 size="medium"

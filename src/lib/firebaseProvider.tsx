@@ -1,5 +1,6 @@
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import { IUser } from '../constants/types';
 
 export const DoSignUp = async (email: string,
     password: string,) => {
@@ -35,5 +36,20 @@ export const SaveUser = (data: FirebaseAuthTypes.UserCredential) => {
         email: data.user.email ?? '',
         avatar: data.user.photoURL ?? '',
         backgroundImage: '',
+    });
+};
+
+export const getUserByUid = (uid: string) => {
+    return firestore().collection('users').doc(uid).get();
+};
+
+export const UpdateUser = (data: IUser) => {
+    return firestore().collection('users').doc(data.uid.toString()).update({
+        name: data.name ?? '',
+        address: data.address ?? '',
+        website: data.website ?? '',
+        email: data.email ?? '',
+        avatar: data.avatar ?? '',
+        backgroundImage: data.backgroundImage ?? '',
     });
 };

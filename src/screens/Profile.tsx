@@ -1,23 +1,47 @@
-import React, { } from 'react';
+/* eslint-disable react-native/no-inline-styles */
+import React, { useState } from 'react';
 import { useTheme } from '../hooks';
 import { Block, Button, Input, Text } from '../components';
-import { StatusBar, View } from 'react-native';
+import { ActivityIndicator, StatusBar, View } from 'react-native';
 import { Avatar, Image } from 'react-native-elements';
 import { useForm } from 'react-hook-form';
 import { StyleSheet } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
+import { useData } from '../hooks';
+// import { ErrorMessage } from '@hookform/error-message';
 
 const Profile = () => {
   const { colors, sizes } = useTheme();
+  const { user, updateUser } = useData();
+  const [isLoading, setLoading] = useState(false);
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid },
-  } = useForm({ mode: 'onBlur' });
+    formState: { isValid },
+  } = useForm({
+    mode: 'onBlur',
+    defaultValues: {
+      name: user.name,
+      address: user.address,
+      website: user.website,
+      email: user.email,
+    },
+  });
 
-  const onSubmit = data => {
+  const onSubmit = async (data) => {
     if (isValid) {
       console.log('submited ', data);
+      setLoading(true);
+      await updateUser({
+        uid: user.uid,
+        email: data.email,
+        address: data.address,
+        name: data.name,
+        website: data.website,
+        avatar: user.avatar,
+        backgroundImage: user.backgroundImage,
+      });
+      setLoading(false);
     }
   };
 
@@ -59,11 +83,11 @@ const Profile = () => {
       <ScrollView >
         {/* App Bar */}
         <View>
-          <Image style={styles.backgroundImage} borderBottomLeftRadius={55} borderBottomRightRadius={55} source={{ uri: 'https://static.vecteezy.com/system/resources/previews/002/099/717/original/mountain-beautiful-landscape-background-design-illustration-free-vector.jpg' }} />
+          <Image style={styles.backgroundImage} borderBottomLeftRadius={55} borderBottomRightRadius={55} source={{ uri: user.backgroundImage !== null && user.backgroundImage !== '' ? user.backgroundImage : 'https://static.vecteezy.com/system/resources/previews/002/099/717/original/mountain-beautiful-landscape-background-design-illustration-free-vector.jpg' }} />
           <Block center={true} flex={0} row style={styles.profileImage}>
             <Avatar
               size={100}
-              source={{ uri: 'https://i.pinimg.com/originals/a6/58/32/a65832155622ac173337874f02b218fb.png' }}
+              source={{ uri: user.avatar !== null && user.avatar !== '' ? user.avatar : 'https://i.pinimg.com/originals/a6/58/32/a65832155622ac173337874f02b218fb.png' }}
             />
           </Block>
         </View>
@@ -100,8 +124,20 @@ const Profile = () => {
             backgroundColor={colors.secondary}
             marginTop={sizes.spaceInput}
           />
-          {errors.name && <Text>Duration is required.</Text>}
-          <Button
+          {/* <ErrorMessage
+            errors={errors}
+            name="updateProfile"
+            render={({ message }) => <Text
+              p
+              color={colors.danger}
+              bold
+              lineHeight={20}
+              marginTop={10}
+              align="left">
+              *{message}
+            </Text>}
+          /> */}
+          {isLoading ? <ActivityIndicator color={colors.primary} size={50} style={{ marginTop: 10 }} /> : <Button
             radius={sizes.s}
             color={colors.primary}
             marginTop={sizes.spaceInput}
@@ -114,7 +150,7 @@ const Profile = () => {
               marginHorizontal={sizes.m}>
               Submit
             </Text>
-          </Button>
+          </Button>}
         </Block>
       </ScrollView>
     </Block>

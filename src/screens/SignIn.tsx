@@ -34,7 +34,17 @@ const SignIn = ({ navigation }) => {
           setLoading(false);
           if (signInResult.result != null) {
             console.log('User account signed in!', signInResult.result);
-            handleUser(signInResult.result);
+            const firebaseUser = signInResult.result.user;
+            handleUser({
+              uid: firebaseUser.uid ?? '',
+              name: firebaseUser.displayName ?? '',
+              address: '',
+              email: firebaseUser.email ?? '',
+              website: '',
+              avatar: firebaseUser.photoURL ?? '',
+              backgroundImage: '',
+            });
+
             Toast.showWithGravity('Success, User account signed in', Toast.LONG, Toast.TOP);
             navigation.reset({
               index: 0,

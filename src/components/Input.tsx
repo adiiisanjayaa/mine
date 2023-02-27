@@ -152,12 +152,12 @@ const Input = ({
               onChangeText={text => onChange(text)}
             />
           )}
-          rules={{
-            required: {
-              value: true,
-              message: 'Field is required!',
-            },
-          }}
+        // rules={{
+        //   required: {
+        //     value: true,
+        //     message: 'Field is required!',
+        //   },
+        // }}
         /> : <TextInput
           {...inputID}
           {...props}
