@@ -21,26 +21,54 @@ export default () => {
   }
 
   return (
-    <Stack.Navigator screenOptions={screenOptions.stack}>
-      {user ? <Stack.Screen
-        name="Root"
-        component={Root}
-        options={{ title: 'Root' }}
-      /> : <Stack.Screen
-        name="SignIn"
-        component={SignIn}
-        options={{ title: 'Sign In' }}
-      />}
-      <Stack.Screen
-        name="SignUp"
-        component={SignUp}
-        options={{ title: 'Sign Up' }}
-      />
-      <Stack.Screen
-        name="DetailChat"
-        component={DetailChat}
-        options={{ title: 'Detail Chat' }}
-      />
-    </Stack.Navigator>
+    <>
+      {user ?
+        <Stack.Navigator screenOptions={screenOptions.stack} >
+          <Stack.Screen
+            name="Root"
+            component={Root}
+            options={{ title: 'Root' }}
+          />
+          <Stack.Screen
+            name="SignIn"
+            component={SignIn}
+            options={{ title: 'Sign In' }}
+          />
+          <Stack.Screen
+            name="SignUp"
+            component={SignUp}
+            options={{ title: 'Sign Up' }}
+          />
+          <Stack.Screen
+            name="DetailChat"
+            component={DetailChat}
+            options={{ title: 'Detail Chat' }}
+          />
+        </Stack.Navigator >
+        :
+        <Stack.Navigator screenOptions={screenOptions.stack} >
+          <Stack.Screen
+            name="SignIn"
+            component={SignIn}
+            options={{ title: 'Sign In' }}
+          />
+          <Stack.Screen
+            name="Root"
+            component={Root}
+            options={{ title: 'Root' }}
+          />
+          <Stack.Screen
+            name="SignUp"
+            component={SignUp}
+            options={{ title: 'Sign Up' }}
+          />
+          <Stack.Screen
+            name="DetailChat"
+            component={DetailChat}
+            options={{ title: 'Detail Chat' }}
+          />
+        </Stack.Navigator >}
+    </>
+
   );
 };

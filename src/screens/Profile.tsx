@@ -2,15 +2,17 @@
 import React, { useState } from 'react';
 import { useTheme } from '../hooks';
 import { Block, Button, Input, Text } from '../components';
-import { ActivityIndicator, StatusBar, View } from 'react-native';
+import { ActivityIndicator, Pressable, StatusBar, View } from 'react-native';
 import { Avatar, Image } from 'react-native-elements';
 import { useForm } from 'react-hook-form';
 import { StyleSheet } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useData } from '../hooks';
-// import { ErrorMessage } from '@hookform/error-message';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { DoSignOut } from '../lib/firebaseProvider';
+import Toast from 'react-native-simple-toast';
 
-const Profile = () => {
+const Profile = ({ navigation }) => {
   const { colors, sizes } = useTheme();
   const { user, updateUser } = useData();
   const [isLoading, setLoading] = useState(false);
@@ -76,6 +78,12 @@ const Profile = () => {
       position: 'absolute',
       bottom: -50,
     },
+    header: {
+      width: '100%',
+      position: 'absolute',
+      top: 0,
+      padding: 10,
+    },
   });
 
   return (
@@ -84,7 +92,23 @@ const Profile = () => {
         {/* App Bar */}
         <View>
           <Image style={styles.backgroundImage} borderBottomLeftRadius={55} borderBottomRightRadius={55} source={{ uri: user.backgroundImage !== null && user.backgroundImage !== '' ? user.backgroundImage : 'https://static.vecteezy.com/system/resources/previews/002/099/717/original/mountain-beautiful-landscape-background-design-illustration-free-vector.jpg' }} />
-          <Block center={true} flex={0} row style={styles.profileImage}>
+          <Block center={true} flex={0} row style={styles.header} justify="flex-end" align="center">
+            <Pressable onPress={async () => {
+              const signOut = await DoSignOut();
+              if (signOut) {
+                Toast.showWithGravity('Success, signed out', Toast.LONG, Toast.BOTTOM);
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'SignIn' }],
+                });
+              } else {
+                Toast.showWithGravity('Failed, sign out', Toast.LONG, Toast.BOTTOM);
+              }
+            }}>
+              <MaterialIcons name="logout" size={sizes.icon25} color={colors.icon} />
+            </Pressable>
+          </Block>
+          <Block center={true} flex={0} row style={styles.profileImage} >
             <Avatar
               size={100}
               source={{ uri: user.avatar !== null && user.avatar !== '' ? user.avatar : 'https://i.pinimg.com/originals/a6/58/32/a65832155622ac173337874f02b218fb.png' }}

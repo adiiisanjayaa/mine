@@ -27,6 +27,16 @@ export const DoSignIn = async (email: string,
         });
 };
 
+export const DoSignOut = async () => {
+    return await auth()
+        .signOut().then(() => {
+            return true;
+        }).catch((error) => {
+            console.error(error);
+            return false;
+        });
+};
+
 export const SaveUser = (data: FirebaseAuthTypes.UserCredential) => {
     return firestore().collection('users').doc(data.user.uid).set({
         uid: data.user.uid,

@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 
@@ -13,32 +12,34 @@ import {
 import { light } from '../constants';
 import { getUserByUid, UpdateUser } from '../lib/firebaseProvider';
 import auth from '@react-native-firebase/auth';
+import Toast from 'react-native-simple-toast';
 
 export const DataContext = React.createContext({});
 
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   const [theme, setTheme] = useState<ITheme>(light);
-  const [user, setUser] = useState<IUser>();
+  const [user, setUser] = useState<IUser | undefined>();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     //Every time the App is opened, this provider is rendered
     //and call de init function.
-    init();
-  }, []);
+    console.log('current user : ', user);
+    if (user === undefined) {
+      console.log('run init');
+      init();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   async function init(): Promise<void> {
     try {
-      //Try get the data from Async Storage
       const currentUser = auth().currentUser;
       if (currentUser != null) {
         await getUserByUid(currentUser.uid.toString()).then((doc) => {
           const data = doc.data();
-
           if (data !== undefined) {
-            console.log(data.name);
-            setUser({ uid: data.uid, email: data.email, name: data.name, address: data.address, website: data.website, avatar: data.avatar, backgroundImage: data.backgroundImage });
-            console.log('current user : ', user);
+            handleUser({ uid: data.uid, email: data.email, name: data.name, address: data.address, website: data.website, avatar: data.avatar, backgroundImage: data.backgroundImage });
           }
         });
       }
@@ -51,7 +52,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
 
   // handle user
   const handleUser = useCallback(
-    async (payload: IUser) => {
+    async (payload: IUser | undefined) => {
       // set user / compare if has updated
       if (JSON.stringify(payload) !== JSON.stringify(user)) {
         setUser(payload);
@@ -65,19 +66,22 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       // set user / compare if has updated
       if (JSON.stringify(payload) !== JSON.stringify(user)) {
         try {
-          await UpdateUser(payload).then(() => { console.log('data updated'); });
+          await UpdateUser(payload).then(() => {
+            init();
+            Toast.showWithGravity('Success update profile', Toast.LONG, Toast.BOTTOM);
+          });
         } catch (err) {
           console.log('failed update user', err);
+          Toast.showWithGravity('Failed, update profile', Toast.LONG, Toast.BOTTOM);
         }
-        handleUser(payload);
       }
     };
-
 
   const contextValue = {
     theme,
     setTheme,
     user,
+    setUser,
     handleUser,
     updateUser,
     loading,

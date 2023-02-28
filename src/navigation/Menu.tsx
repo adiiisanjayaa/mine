@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Linking, StyleSheet } from 'react-native';
 
@@ -213,6 +214,7 @@ export default () => {
         drawerType="slide"
         overlayColor="transparent"
         sceneContainerStyle={{ backgroundColor: 'transparent' }}
+        // eslint-disable-next-line react/no-unstable-nested-components
         drawerContent={(props) => <DrawerContent {...props} />}
         drawerStyle={{
           flex: 1,
