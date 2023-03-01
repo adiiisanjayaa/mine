@@ -9,6 +9,7 @@ import SignIn from '../screens/SignIn';
 import SignUp from '../screens/SignUp';
 import { useData } from '../hooks';
 import { Loading } from '../components/Loading';
+import Contacts from '../screens/Contacts';
 
 const Stack = createStackNavigator();
 
@@ -44,6 +45,11 @@ export default () => {
             component={DetailChat}
             options={{ title: 'Detail Chat' }}
           />
+          <Stack.Screen
+            name="Contacts"
+            component={Contacts}
+            options={{ title: 'Contacts' }}
+          />
         </Stack.Navigator >
         :
         <Stack.Navigator screenOptions={screenOptions.stack} >
@@ -53,19 +59,9 @@ export default () => {
             options={{ title: 'Sign In' }}
           />
           <Stack.Screen
-            name="Root"
-            component={Root}
-            options={{ title: 'Root' }}
-          />
-          <Stack.Screen
             name="SignUp"
             component={SignUp}
             options={{ title: 'Sign Up' }}
-          />
-          <Stack.Screen
-            name="DetailChat"
-            component={DetailChat}
-            options={{ title: 'Detail Chat' }}
           />
         </Stack.Navigator >}
     </>

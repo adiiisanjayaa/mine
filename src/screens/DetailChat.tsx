@@ -8,6 +8,7 @@ import { Pressable, StatusBar, StyleSheet, View } from 'react-native';
 import { Avatar, ListItem } from 'react-native-elements';
 import { FlatList } from 'react-native-gesture-handler';
 import Entypo from 'react-native-vector-icons/Entypo';
+import { profilePic } from '../constants/constants';
 
 enum ChatPosition {
   left,
@@ -157,7 +158,7 @@ const DetailChat = ({ navigation }) => {
           <Avatar
             title="Adi Sanjaya"
             size="medium"
-            source={{ uri: 'https://i.pinimg.com/originals/a6/58/32/a65832155622ac173337874f02b218fb.png' }}
+            source={{ uri: profilePic }}
           />
           <ListItem.Content>
             <Text h5 bold={true} color={colors.text}>

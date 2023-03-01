@@ -1,84 +1,80 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { } from 'react';
-import { useTheme } from '../hooks/';
-import { Block, Input, Text } from '../components/';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import Entypo from 'react-native-vector-icons/Entypo';
+import { useTheme } from '../hooks';
+import { Block, Input, Text } from '../components';
 import Feather from 'react-native-vector-icons/Feather';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Pressable, StatusBar, StyleSheet } from 'react-native';
 import { Avatar, ListItem } from 'react-native-elements';
 import { FlatList } from 'react-native-gesture-handler';
 import { profilePic } from '../constants/constants';
 
-
-const Home = ({ navigation }) => {
+const Contacts = ({ navigation }) => {
   const { colors, sizes } = useTheme();
   const DATA = [
     {
       id: Math.random().toString(),
       title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
+      subTitle: 'Masih Hidup',
       url: profilePic,
     },
     {
       id: Math.random().toString(),
       title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
+      subTitle: 'Masih Hidup',
       url: profilePic,
     },
     {
       id: Math.random().toString(),
       title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
+      subTitle: 'Masih Hidup',
       url: profilePic,
     },
     {
       id: Math.random().toString(),
       title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
+      subTitle: 'Masih Hidup',
       url: profilePic,
     },
     {
       id: Math.random().toString(),
       title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
+      subTitle: 'Masih Hidup',
       url: profilePic,
     },
     {
       id: Math.random().toString(),
       title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
+      subTitle: 'Masih Hidup',
       url: profilePic,
     },
     {
       id: Math.random().toString(),
       title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
+      subTitle: 'Masih Hidup',
       url: profilePic,
     },
     {
       id: Math.random().toString(),
       title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
+      subTitle: 'Masih Hidup',
       url: profilePic,
     },
     {
       id: Math.random().toString(),
       title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
+      subTitle: 'Masih Hidup',
       url: profilePic,
     },
     {
       id: Math.random().toString(),
       title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
+      subTitle: 'Masih Hidup',
       url: profilePic,
     },
     {
       id: Math.random().toString(),
       title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
+      subTitle: 'Masih Hidup',
       url: profilePic,
     },
   ];
@@ -86,11 +82,9 @@ const Home = ({ navigation }) => {
   const styles = StyleSheet.create({
     itemList: {
       backgroundColor: colors.light,
-      paddingHorizontal: 0,
-      paddingTop: 0,
-      paddingBottom: 20,
+      paddingHorizontal: 20,
+      paddingVertical: 20,
       margin: 0,
-      padding: 0,
     },
     paddingBottom: {
       paddingBottom: 20,
@@ -98,27 +92,24 @@ const Home = ({ navigation }) => {
   });
 
   return (
-    <Block color={colors.light} flex={1}>
+    <Block color={colors.light} flex={1} marginTop={StatusBar.currentHeight}>
       {/* App Bar */}
-      <Block flex={0} paddingHorizontal={sizes.padding} padding={sizes.padding}>
-        <Block row flex={0} marginTop={StatusBar.currentHeight} justify="space-between" align="center">
-          <FontAwesome name="angle-left" size={sizes.icon30} color={colors.white} />
-          <Entypo name="dots-three-vertical" size={sizes.icon20} color={colors.icon} />
-        </Block>
-        <Block row flex={0} marginVertical={sizes.padding} justify="space-between" align="center">
-          <Text h3 bold={true} color={colors.text}>
-            Chats
-          </Text>
-          <Pressable onPress={() => { navigation.push('Contacts'); }}>
-            <Feather name="edit" size={sizes.icon25} color={colors.icon} />
+      <Block flex={0} >
+        <ListItem containerStyle={[styles.itemList]} >
+          <Pressable onPress={() => { navigation.pop(); }}>
+            <Block flex={0} justify="flex-start" align="flex-start">
+              <Feather name="chevron-left" size={sizes.icon30} color={colors.icon} />
+            </Block>
           </Pressable>
-        </Block>
-        {/* Search */}
-        <Input
-          placeholder="Search for chat & messages"
-          icon={<Feather name="search" size={sizes.icon25} color={colors.icon} />}
-          backgroundColor={colors.secondary}
-        />
+          {/* Search */}
+          <Block flex={1}>
+            <Input
+              placeholder="Search for chat & messages"
+              icon={<Feather name="search" size={sizes.icon25} color={colors.icon} />}
+              backgroundColor={colors.secondary}
+            />
+          </Block>
+        </ListItem>
       </Block>
 
       {/* Chat List */}
@@ -145,13 +136,6 @@ const Home = ({ navigation }) => {
                   {item.subTitle}
                 </Text>
               </ListItem.Content>
-
-              <Block flex={0} justify="flex-end" align="flex-end">
-                <Text color={colors.text}>
-                  14:50
-                </Text>
-                <Ionicons name="ios-checkmark-done" size={sizes.icon25} color={colors.icon} />
-              </Block>
             </ListItem>);
           }}
           keyExtractor={item => item.id}
@@ -161,4 +145,4 @@ const Home = ({ navigation }) => {
   );
 };
 
-export default Home;
+export default Contacts;
