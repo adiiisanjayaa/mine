@@ -1,83 +1,34 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTheme } from '../hooks';
 import { Block, Input, Text } from '../components';
 import Feather from 'react-native-vector-icons/Feather';
 import { Pressable, StatusBar, StyleSheet } from 'react-native';
 import { Avatar, ListItem } from 'react-native-elements';
 import { FlatList } from 'react-native-gesture-handler';
-import { profilePic } from '../constants/constants';
+import { defaultProfilePic } from '../constants/constants';
+import { getUsers } from '../lib/firebaseProvider';
+import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import { Loading } from '../components/Loading';
+import { IUser } from '../constants/types';
 
 const Contacts = ({ navigation }) => {
   const { colors, sizes } = useTheme();
-  const DATA = [
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'Masih Hidup',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'Masih Hidup',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'Masih Hidup',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'Masih Hidup',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'Masih Hidup',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'Masih Hidup',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'Masih Hidup',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'Masih Hidup',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'Masih Hidup',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'Masih Hidup',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'Masih Hidup',
-      url: profilePic,
-    },
-  ];
+  const [contact, setContact] = useState<Array<FirebaseFirestoreTypes.DocumentData>>();
+  const [isLoading, setLoading] = useState<boolean>(true);
+
+  const getAllUser = async () => {
+    const users = await getUsers();
+    const listUser: Array<FirebaseFirestoreTypes.DocumentData> = [];
+    users.docs.forEach((doc) => {
+      const data = doc.data();
+      listUser.push(data);
+    });
+    setLoading(false);
+    setContact(listUser);
+  };
+
+  useEffect(() => { getAllUser(); }, []);
 
   const styles = StyleSheet.create({
     itemList: {
@@ -90,6 +41,10 @@ const Contacts = ({ navigation }) => {
       paddingBottom: 20,
     },
   });
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <Block color={colors.light} flex={1} marginTop={StatusBar.currentHeight}>
@@ -104,8 +59,8 @@ const Contacts = ({ navigation }) => {
           {/* Search */}
           <Block flex={1}>
             <Input
-              placeholder="Search for chat & messages"
-              icon={<Feather name="search" size={sizes.icon25} color={colors.icon} />}
+              placeholder="Search for contacts"
+              iconRight={<Feather name="search" size={sizes.icon25} color={colors.icon} />}
               backgroundColor={colors.secondary}
             />
           </Block>
@@ -115,30 +70,40 @@ const Contacts = ({ navigation }) => {
       {/* Chat List */}
       <Block flex={1}>
         <FlatList
-          data={DATA}
+          data={contact}
           alwaysBounceVertical={true}
           bounces={true}
           renderItem={({ item, index }) => {
-            const isEnd = index === DATA.length - 1;
+            if (contact === undefined) { return <></>; }
+            const isEnd = index === contact.length - 1;
             return (<ListItem onPress={() => {
-              navigation.push('DetailChat');
+              const toUser: IUser = {
+                uid: item.uid,
+                name: item.name,
+                email: item.email,
+                avatar: item.avatar,
+                address: item.address,
+                backgroundImage: item.backgroundImage,
+                website: item.website,
+              };
+              navigation.push('DetailChat', { toUser: toUser });
             }} containerStyle={[styles.itemList, { paddingHorizontal: sizes.padding, paddingTop: 10, paddingBottom: isEnd ? 100 : 10 }]} >
               <Avatar
-                title={item.title}
+                title={item.name}
                 size="medium"
-                source={{ uri: item.url }}
+                source={item.avatar !== null && item.avatar !== '' ? { uri: item.avatar } : defaultProfilePic}
               />
               <ListItem.Content>
                 <Text h5 bold={true} color={colors.text}>
-                  {item.title}
+                  {item.name ?? '-'}
                 </Text>
                 <Text color={colors.text}>
-                  {item.subTitle}
+                  {item.email}
                 </Text>
               </ListItem.Content>
             </ListItem>);
           }}
-          keyExtractor={item => item.id}
+          keyExtractor={item => item.uid}
         />
       </Block>
     </Block>

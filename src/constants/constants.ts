@@ -1,1 +1,9 @@
-export const profilePic = 'https://i.pinimg.com/originals/a6/58/32/a65832155622ac173337874f02b218fb.png';
+export const defaultProfilePic = require('../assets/icons/profile.png');
+export enum typeChat {
+    text,
+    image,
+    video,
+    gif,
+    file,
+    sticker,
+}

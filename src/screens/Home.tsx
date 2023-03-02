@@ -9,7 +9,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Pressable, StatusBar, StyleSheet } from 'react-native';
 import { Avatar, ListItem } from 'react-native-elements';
 import { FlatList } from 'react-native-gesture-handler';
-import { profilePic } from '../constants/constants';
+import { defaultProfilePic } from '../constants/constants';
 
 
 const Home = ({ navigation }) => {
@@ -19,67 +19,7 @@ const Home = ({ navigation }) => {
       id: Math.random().toString(),
       title: 'Adi Sanjaya',
       subTitle: 'hii how are you today ?',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
-      url: profilePic,
-    },
-    {
-      id: Math.random().toString(),
-      title: 'Adi Sanjaya',
-      subTitle: 'hii how are you today ?',
-      url: profilePic,
+      url: null,
     },
   ];
 
@@ -135,7 +75,7 @@ const Home = ({ navigation }) => {
               <Avatar
                 title={item.title}
                 size="medium"
-                source={{ uri: item.url }}
+                source={item.url != null ? { uri: item.url } : defaultProfilePic}
               />
               <ListItem.Content>
                 <Text h5 bold={true} color={colors.text}>

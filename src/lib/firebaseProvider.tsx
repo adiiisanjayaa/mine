@@ -1,5 +1,5 @@
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
+import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { IUser } from '../constants/types';
 
 export const DoSignUp = async (email: string,
@@ -40,12 +40,12 @@ export const DoSignOut = async () => {
 export const SaveUser = (data: FirebaseAuthTypes.UserCredential) => {
     return firestore().collection('users').doc(data.user.uid).set({
         uid: data.user.uid,
-        name: data.user.displayName ?? '',
-        address: '',
-        website: '',
-        email: data.user.email ?? '',
-        avatar: data.user.photoURL ?? '',
-        backgroundImage: '',
+        name: data.user.displayName,
+        address: null,
+        website: null,
+        email: data.user.email,
+        avatar: data.user.photoURL,
+        backgroundImage: null,
     });
 };
 
@@ -53,13 +53,60 @@ export const getUserByUid = (uid: string) => {
     return firestore().collection('users').doc(uid).get();
 };
 
+export const getUsers = () => {
+    return firestore().collection('users').get();
+};
+
 export const UpdateUser = (data: IUser) => {
     return firestore().collection('users').doc(data.uid.toString()).update({
-        name: data.name ?? '',
-        address: data.address ?? '',
-        website: data.website ?? '',
-        email: data.email ?? '',
-        avatar: data.avatar ?? '',
-        backgroundImage: data.backgroundImage ?? '',
+        name: data.name,
+        address: data.address,
+        website: data.website,
+        email: data.email,
+        avatar: data.avatar,
+        backgroundImage: data.backgroundImage,
     });
+};
+
+export const getMessageByGroupUid = async (fromUid: string, toUid: string) => {
+    const groupUid1 = fromUid + toUid;
+    const groupUid2 = toUid + fromUid;
+
+    try {
+        let groupChat: FirebaseFirestoreTypes.DocumentData;
+        const groupChat1 = await (await firestore().collection('messages').doc(groupUid1).collection('messages').get()).query.orderBy('createdAt', 'desc').get();
+        if (groupChat1.empty) {
+            groupChat = await (await firestore().collection('messages').doc(groupUid2).collection('messages').get()).query.orderBy('createdAt', 'desc').get();
+            console.log('groupUid1 not found');
+            if (!groupChat.empty) {
+                console.log('groupUid2 not found');
+            }
+        } else {
+            const data: Array<FirebaseFirestoreTypes.DocumentData> = [];
+            groupChat1.docs.forEach((doc) => {
+                const x = doc.data();
+                console.log(doc.id, ' => ', x);
+                data.push(x);
+            });
+            return data;
+        }
+    } catch (e) {
+        console.log('error getMessageByGroupUid : ', e);
+    }
+};
+
+export const sentMessage = async (groupUid: string, fromUser: IUser, toUser: IUser, content: string, type: string) => {
+    try {
+        const sent = await firestore().collection('messages').doc(groupUid).collection('messages').add({
+            fromUid: fromUser.uid,
+            toUserUid: toUser.uid,
+            content: content,
+            createdAt: new Date().valueOf(),
+            type: type.toString(),
+        });
+        console.log('sentMessage Chat : ', sent);
+        return sent;
+    } catch (e) {
+        console.log('errorSentMessage', e);
+    }
 };

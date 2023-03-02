@@ -11,7 +11,7 @@ import { useData } from '../hooks';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { DoSignOut } from '../lib/firebaseProvider';
 import Toast from 'react-native-simple-toast';
-import { profilePic } from '../constants/constants';
+import { defaultProfilePic } from '../constants/constants';
 
 const Profile = ({ navigation }) => {
   const { colors, sizes } = useTheme();
@@ -112,7 +112,8 @@ const Profile = ({ navigation }) => {
           <Block center={true} flex={0} row style={styles.profileImage} >
             <Avatar
               size={100}
-              source={{ uri: user.avatar !== null && user.avatar !== '' ? user.avatar : profilePic }}
+              rounded={true}
+              source={user.avatar !== null && user.avatar !== '' ? { uri: user.avatar } : defaultProfilePic}
             />
           </Block>
         </View>

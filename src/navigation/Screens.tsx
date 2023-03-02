@@ -8,8 +8,8 @@ import DetailChat from '../screens/DetailChat';
 import SignIn from '../screens/SignIn';
 import SignUp from '../screens/SignUp';
 import { useData } from '../hooks';
-import { Loading } from '../components/Loading';
 import Contacts from '../screens/Contacts';
+import { SplashScreen } from '../components/SplashScreen';
 
 const Stack = createStackNavigator();
 
@@ -18,7 +18,7 @@ export default () => {
   const { loading, user } = useData();
 
   if (loading) {
-    return <Loading />;
+    return <SplashScreen />;
   }
 
   return (

@@ -224,7 +224,7 @@ export interface ThemeAssets {
   OpenSansBold?: any;
 
   logoWhite: ImageSourcePropType;
-  logoYellow: ImageSourcePropType;
+  // logoYellow: ImageSourcePropType;
 }
 
 export interface ThemeFonts {

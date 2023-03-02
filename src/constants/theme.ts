@@ -45,7 +45,7 @@ export const ASSETS: ThemeAssets = {
 
   // backgrounds/logo
   logoWhite: require('../assets/images/logo-white.png'),
-  logoYellow: require('../assets/images/logo-yellow.png'),
+  // logoYellow: require('../assets/images/logo-yellow.png'),
 };
 
 export const FONTS: ThemeFonts = {
