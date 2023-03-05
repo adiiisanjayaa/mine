@@ -30,7 +30,7 @@ const SignUp = ({ navigation }) => {
       if (isEmail) {
         try {
           setLoading(true);
-          const signUpResult = await DoSignUp(data.email, data.password);
+          const signUpResult = await DoSignUp(data.email, data.password, data.name);
           setLoading(false);
           if (signUpResult.result != null) {
             console.log('User account created & signed in!', signUpResult.result);

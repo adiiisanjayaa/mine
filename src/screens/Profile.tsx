@@ -85,6 +85,14 @@ const Profile = ({ navigation }) => {
       top: 0,
       padding: 10,
     },
+    logout: {
+      width: 50,
+      height: 50,
+      backgroundColor: colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 5,
+    },
   });
 
   return (
@@ -106,7 +114,7 @@ const Profile = ({ navigation }) => {
                 Toast.showWithGravity('Failed, sign out', Toast.LONG, Toast.BOTTOM);
               }
             }}>
-              <MaterialIcons name="logout" size={sizes.icon25} color={colors.icon} />
+              <Block style={styles.logout}><MaterialIcons name="logout" size={sizes.icon25} color={colors.white} /></Block>
             </Pressable>
           </Block>
           <Block center={true} flex={0} row style={styles.profileImage} >

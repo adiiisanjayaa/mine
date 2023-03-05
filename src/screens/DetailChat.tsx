@@ -25,6 +25,7 @@ const DetailChat = ({ navigation }) => {
   const { colors, sizes } = useTheme();
   const route = useRoute<RouteProp<StackParamsList, 'DetailChat'>>();
   const [isLoading, setLoading] = useState(true);
+  const [currentGroupUID, setCurrentGroupUID] = useState<string>();
   const [toUser, setToUser] = useState<IUser>();
   const [messages, setMessages] = useState<Array<FirebaseFirestoreTypes.DocumentData>>();
   const { user } = useData();
@@ -48,6 +49,7 @@ const DetailChat = ({ navigation }) => {
       const toUid = route.params !== undefined ? route.params.toUser.uid : '';
       console.log('currentUserUid: ', fromUid);
       console.log('toUid: ', toUid);
+      console.log('groupUID : ', toUid.toString() + fromUid.toString());
       getMessages(fromUid.toString(), toUid.toString());
     } catch (error) {
     } finally {
@@ -58,7 +60,8 @@ const DetailChat = ({ navigation }) => {
 
   const getMessages = (fromUid: string, toUid: string) => {
     getMessageByGroupUid(fromUid.toString(), toUid.toString()).then((res) => {
-      setMessages(res);
+      setMessages(res?.result);
+      setCurrentGroupUID(res?.groupUID);
       console.log('message: ', res);
     });
   };
@@ -66,8 +69,7 @@ const DetailChat = ({ navigation }) => {
   const sentNewMessage = (message: string) => {
     const fromUid = user.uid;
     const toUid = route.params !== undefined ? route.params.toUser.uid : '';
-    const groupChat = fromUid.toString() + toUid.toString();
-    sentMessage(groupChat, user, route.params.toUser, message, typeChat.text.toString()).then(() => {
+    sentMessage(currentGroupUID, user, route.params.toUser, message, typeChat.text.toString()).then(() => {
       getMessages(fromUid.toString(), toUid.toString());
       reset();
     });
@@ -146,7 +148,8 @@ const DetailChat = ({ navigation }) => {
           <Avatar
             title={toUser?.name ?? '-'}
             size="medium"
-            source={toUser?.avatar != null ? { uri: toUser?.avatar } : defaultProfilePic}
+            rounded
+            source={toUser?.avatar != null && toUser?.avatar !== '' ? { uri: toUser?.avatar } : defaultProfilePic}
           />
           <ListItem.Content>
             <Text h5 bold={true} color={colors.text}>
@@ -167,14 +170,7 @@ const DetailChat = ({ navigation }) => {
       <Block flex={1}>
         {messages === undefined ?
           <Block color={colors.light} marginTop={StatusBar.currentHeight} style={styles.container} >
-            <Text
-              transform="capitalize"
-              bold
-              size={sizes.h5}
-              lineHeight={40}
-              marginHorizontal={sizes.m}>
-              No Messages
-            </Text>
+            <Loading />
           </Block> : <FlatList
             data={messages}
             style={[styles.flatList]}

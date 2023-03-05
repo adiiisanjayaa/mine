@@ -91,6 +91,7 @@ const Contacts = ({ navigation }) => {
               <Avatar
                 title={item.name}
                 size="medium"
+                rounded
                 source={item.avatar !== null && item.avatar !== '' ? { uri: item.avatar } : defaultProfilePic}
               />
               <ListItem.Content>

@@ -1,3 +1,4 @@
+import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import {ITheme} from './theme';
 
 export * from './components';
@@ -11,6 +12,11 @@ export interface IUser {
   website?: string;
   avatar?: string;
   backgroundImage?: string;
+}
+
+export interface IURecentChat {
+  data: FirebaseFirestoreTypes.DocumentData;
+  userData: Array<IUser>;
 }
 
 export interface IUseData {

@@ -39,7 +39,15 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
         await getUserByUid(currentUser.uid.toString()).then((doc) => {
           const data = doc.data();
           if (data !== undefined) {
-            handleUser({ uid: data.uid, email: data.email, name: data.name, address: data.address, website: data.website, avatar: data.avatar, backgroundImage: data.backgroundImage });
+            handleUser({
+              uid: data.uid,
+              email: data.email,
+              name: data.name,
+              address: data.address,
+              website: data.website,
+              avatar: data.avatar,
+              backgroundImage: data.backgroundImage,
+            });
           }
         });
       }
