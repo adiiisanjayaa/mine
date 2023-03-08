@@ -12,6 +12,7 @@ export interface IUser {
   website?: string;
   avatar?: string;
   backgroundImage?: string;
+  token?: string;
 }
 
 export interface IURecentChat {

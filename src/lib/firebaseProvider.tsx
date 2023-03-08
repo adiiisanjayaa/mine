@@ -1,5 +1,6 @@
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import { firebase } from '@react-native-firebase/messaging';
 import { IUser } from '../constants/types';
 
 export const DoSignUp = async (email: string,
@@ -19,6 +20,7 @@ export const DoSignIn = async (email: string,
     password: string,) => {
     return await auth()
         .signInWithEmailAndPassword(email, password).then((loggedInUser) => {
+            UpdateUserToken(loggedInUser.user.uid);
             return { result: loggedInUser, error: null };
         }).catch((error) => {
             console.error(error);
@@ -37,16 +39,28 @@ export const DoSignOut = async () => {
         });
 };
 
+const getToken = async () => {
+    try {
+        const token = await firebase.messaging().getToken();
+        if (token) { return token; }
+    } catch (error) {
+        console.log(error);
+    }
+};
+
 export const SaveUser = (data: FirebaseAuthTypes.UserCredential, name: string) => {
-    return firestore().collection('users').doc(data.user.uid).set({
-        uid: data.user.uid,
-        name: name,
-        address: null,
-        website: null,
-        email: data.user.email,
-        avatar: data.user.photoURL,
-        backgroundImage: null,
-        chatWith: [],
+    return getToken().then(async (token) => {
+        await firestore().collection('users').doc(data.user.uid).set({
+            uid: data.user.uid,
+            name: name,
+            address: null,
+            website: null,
+            email: data.user.email,
+            avatar: data.user.photoURL,
+            backgroundImage: null,
+            chatWith: [],
+            token: token,
+        });
     });
 };
 
@@ -82,6 +96,14 @@ export const UpdateUser = (data: IUser) => {
     });
 };
 
+export const UpdateUserToken = (uid) => {
+    return getToken().then(async (token) => {
+        await firestore().collection('users').doc(uid.toString()).update({
+            token: token,
+        });
+    });
+};
+
 // export async function getRecentChat(user: IUser): FirebaseFirestoreTypes.DocumentData[] {
 export async function GetUserByUid(data: string): Promise<IUser | undefined> {
     return await firestore().collection('users').doc(data.toString()).get().then((doc) => {
@@ -95,6 +117,7 @@ export async function GetUserByUid(data: string): Promise<IUser | undefined> {
                 address: userChat.address,
                 backgroundImage: userChat.backgroundImage,
                 website: userChat.website,
+                token: userChat.token,
             };
             return user;
         } else {
@@ -156,12 +179,35 @@ export const sentMessage = async (groupUid: string | undefined, fromUser: IUser,
                 createdAt: new Date().valueOf(),
                 type: type.toString(),
             });
+            pushNotification(toUser.token, toUser.name, content, toUser.avatar);
         });
         console.log('sentMessage Chat : ', sent);
         return sent;
     } catch (e) {
         console.log('errorSentMessage', e);
     }
+};
+
+export const pushNotification = async (to: string | undefined, from: string | undefined, message: string, photoUrl: string | undefined) => {
+    await fetch('https://fcm.googleapis.com/fcm/send', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'key=AAAA5EAdv1U:APA91bFRGSSp6yIAoQcIBA0UC2UvwZShIMStH6tIICLw8_6zQ8D57pdaZdcsyRkow0pqQjueS5JScevotC6v-qCGbyLOCOW70exL-502EqSR0sHq1L36cZd_olKR_XzmFk4HBc-DmRhI',
+        },
+        body: JSON.stringify({
+            'to': to,
+            'notification': {
+                'title': from,
+                'body': message,
+                'mutable_content': true,
+                'sound': 'Tri-tone',
+            },
+            'data': {
+                'url': photoUrl,
+            },
+        }),
+    }).then((response) => { console.log(response); });
 };
 
 // export async function getRecentChat(user: IUser): FirebaseFirestoreTypes.DocumentData[] {

@@ -16,7 +16,7 @@ import firestore, { } from '@react-native-firebase/firestore';
 import moment from 'moment';
 import { IURecentChat, IUser } from '../constants/types';
 import { GetUserByUid } from '../lib/firebaseProvider';
-
+// import { useToast } from 'react-native-toast-notifications';
 
 const Home = ({ navigation }) => {
   const { colors, sizes } = useTheme();
@@ -24,6 +24,7 @@ const Home = ({ navigation }) => {
   const [isLoading, setLoading] = useState(true);
   const [isRefresh, setRefresh] = useState(false);
   const [recentChat, setRecentChat] = useState<Array<IURecentChat>>([]);
+  // const toast = useToast();
 
   const onRefresh = React.useCallback(() => {
     setRefresh(true);
@@ -100,7 +101,16 @@ const Home = ({ navigation }) => {
           <Text h3 bold={true} color={colors.text}>
             Chat
           </Text>
-          <Pressable onPress={() => { navigation.push('Contacts'); }}>
+          <Pressable onPress={() => {
+            navigation.push('Contacts');
+            // toast.show('', {
+            //   type: 'custom_type',
+            //   placement: 'top',
+            //   duration: 2000,
+            //   animationType: 'slide-in',
+            //   data: { avatar: null, name: 'Adi Sanjaya', message: 'Test Pesan' },
+            // });
+          }}>
             <Feather name="edit" size={sizes.icon25} color={colors.icon} />
           </Pressable>
         </Block>
@@ -156,7 +166,7 @@ const Home = ({ navigation }) => {
                     title={userChat.name}
                     size="medium"
                     rounded
-                    source={userChat.avatar != null ? { uri: userChat.avatar } : defaultProfilePic}
+                    source={userChat.avatar != null && userChat.avatar !== '' ? { uri: userChat.avatar } : defaultProfilePic}
                   />
                   <ListItem.Content>
                     <Text h5 bold={true} color={colors.text}>

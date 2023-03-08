@@ -7,6 +7,7 @@ export const SplashScreen = () => {
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
+        console.log('init splash');
         Animated.timing(fadeAnim, {
             toValue: 1,
             duration: 100,
