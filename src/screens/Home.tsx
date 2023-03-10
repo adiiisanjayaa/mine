@@ -159,6 +159,7 @@ const Home = ({ navigation }) => {
                     address: userChat.address,
                     backgroundImage: userChat.backgroundImage,
                     website: userChat.website,
+                    token: userChat.token,
                   };
                   navigation.push('DetailChat', { toUser: toUser });
                 }} containerStyle={[styles.itemList, { paddingHorizontal: sizes.padding, paddingTop: 10, paddingBottom: 10 }]} >

@@ -24,7 +24,7 @@ const Root = () => {
         placement: 'top',
         duration: 2000,
         animationType: 'slide-in',
-        data: { avatar: avatar, message_title: 'Adi Sanjaya', message_body: 'Test Pesan' },
+        data: { avatar: avatar, name: message_title, message: message_body },
       });
     });
     return unsubscribe;

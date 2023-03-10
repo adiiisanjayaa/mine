@@ -2,6 +2,8 @@ import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { firebase } from '@react-native-firebase/messaging';
 import { IUser } from '../constants/types';
+import messaging from '@react-native-firebase/messaging';
+import { serverKey } from '../constants/constants';
 
 export const DoSignUp = async (email: string,
     password: string, name: string) => {
@@ -32,6 +34,7 @@ export const DoSignIn = async (email: string,
 export const DoSignOut = async () => {
     return await auth()
         .signOut().then(() => {
+            messaging().deleteToken();
             return true;
         }).catch((error) => {
             console.error(error);
@@ -104,7 +107,6 @@ export const UpdateUserToken = (uid) => {
     });
 };
 
-// export async function getRecentChat(user: IUser): FirebaseFirestoreTypes.DocumentData[] {
 export async function GetUserByUid(data: string): Promise<IUser | undefined> {
     return await firestore().collection('users').doc(data.toString()).get().then((doc) => {
         const userChat = doc.data();
@@ -189,11 +191,12 @@ export const sentMessage = async (groupUid: string | undefined, fromUser: IUser,
 };
 
 export const pushNotification = async (to: string | undefined, from: string | undefined, message: string, photoUrl: string | undefined) => {
+    console.log('Notification Data: ', from, message, photoUrl, to);
     await fetch('https://fcm.googleapis.com/fcm/send', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'key=AAAA5EAdv1U:APA91bFRGSSp6yIAoQcIBA0UC2UvwZShIMStH6tIICLw8_6zQ8D57pdaZdcsyRkow0pqQjueS5JScevotC6v-qCGbyLOCOW70exL-502EqSR0sHq1L36cZd_olKR_XzmFk4HBc-DmRhI',
+            'Authorization': serverKey,
         },
         body: JSON.stringify({
             'to': to,
@@ -201,7 +204,6 @@ export const pushNotification = async (to: string | undefined, from: string | un
                 'title': from,
                 'body': message,
                 'mutable_content': true,
-                'sound': 'Tri-tone',
             },
             'data': {
                 'url': photoUrl,
@@ -210,24 +212,7 @@ export const pushNotification = async (to: string | undefined, from: string | un
     }).then((response) => { console.log(response); });
 };
 
-// export async function getRecentChat(user: IUser): FirebaseFirestoreTypes.DocumentData[] {
-//     try {
-//         await firestore().collection('messages').where('users', 'array-contains-any', [user]).onSnapshot((querySnapshot) => {
-//             const data: Array<FirebaseFirestoreTypes.DocumentData> = [];
-//             querySnapshot.docs.map((doc) => {
-//                 const x = doc.data();
-//                 console.log(doc.id, ' => ', x);
-//                 data.push(x);
-//             });
-//             return data;
-//         });
-//     } catch (e) {
-//         console.log('error getRecentChat', e);
-//     }
-//     return [];
-// }
-
-export const getRecentChat2 = async (user: IUser) => {
+export const getRecentChat = async (user: IUser) => {
     try {
         return firestore().collection('messages').where('users', 'array-contains-any', [user]).onSnapshot((querySnapshot) => {
             const threads = querySnapshot.docs.map((documentSnapshot) => {
@@ -242,6 +227,6 @@ export const getRecentChat2 = async (user: IUser) => {
         });
 
     } catch (e) {
-        console.log('error getRecentChat2', e);
+        console.log('error getRecentChat', e);
     }
 };
