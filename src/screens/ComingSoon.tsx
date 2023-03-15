@@ -21,6 +21,11 @@ const ComingSoon = () => {
 
   return (
     <Block color={colors.light} marginTop={StatusBar.currentHeight} style={styles.container} >
+      <StatusBar
+        animated={true}
+        backgroundColor="#ffffff"
+        barStyle={'dark-content'}
+      />
       <Image
         style={styles.backgroundImage}
         resizeMode="contain"

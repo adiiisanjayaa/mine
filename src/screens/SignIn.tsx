@@ -66,6 +66,11 @@ const SignIn = ({ navigation }) => {
 
   return (
     <Block color={colors.light} marginTop={StatusBar.currentHeight} style={{ padding: sizes.padding }} >
+      <StatusBar
+        animated={true}
+        backgroundColor="#ffffff"
+        barStyle={'dark-content'}
+      />
       <ScrollView >
         <Block flex={1} marginTop={sizes.l} >
           <Block style={styles.container}>

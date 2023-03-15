@@ -48,6 +48,11 @@ const Contacts = ({ navigation }) => {
 
   return (
     <Block color={colors.light} flex={1} marginTop={StatusBar.currentHeight}>
+      <StatusBar
+        animated={true}
+        backgroundColor="#ffffff"
+        barStyle={'dark-content'}
+      />
       {/* App Bar */}
       <Block flex={0} >
         <ListItem containerStyle={[styles.itemList]} >

@@ -91,6 +91,11 @@ const Home = ({ navigation }) => {
 
   return (
     <Block color={colors.light} flex={1}>
+      <StatusBar
+        animated={true}
+        backgroundColor="#ffffff"
+        barStyle={'dark-content'}
+      />
       {/* App Bar */}
       <Block flex={0} paddingHorizontal={sizes.padding} padding={sizes.padding}>
         <Block row flex={0} marginTop={StatusBar.currentHeight} justify="space-between" align="center">

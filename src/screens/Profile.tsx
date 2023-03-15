@@ -97,6 +97,11 @@ const Profile = ({ navigation }) => {
 
   return (
     <Block color={colors.light} flex={1} marginTop={StatusBar.currentHeight} >
+      <StatusBar
+        animated={true}
+        backgroundColor="#ffffff"
+        barStyle={'dark-content'}
+      />
       <ScrollView >
         {/* App Bar */}
         <View>
