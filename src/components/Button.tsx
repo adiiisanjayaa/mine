@@ -101,8 +101,9 @@ const Button = ({
   const buttonStyles = StyleSheet.flatten([
     style,
     {
-      minHeight: sizes.xl,
+      minHeight: height ?? sizes.xl,
       minWidth: sizes.xl,
+      height: height,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: buttonColor,

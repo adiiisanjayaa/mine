@@ -172,6 +172,7 @@ export const sentMessage = async (groupUid: string | undefined, fromUser: IUser,
                 user1: { uid: user1, read: true },
                 user2: { uid: user2, read: false },
             },
+            // { fromUser.uid.toString() }: true,
         }).then(async () => {
             console.log('sent message...');
             await firestore().collection('messages').doc(groupUid).collection('messages').add({
@@ -187,6 +188,42 @@ export const sentMessage = async (groupUid: string | undefined, fromUser: IUser,
         return sent;
     } catch (e) {
         console.log('errorSentMessage', e);
+    }
+};
+
+export const readMsg = async (fromUid: string, toUid: string) => {
+    const groupUid1 = fromUid + toUid;
+    const groupUid2 = toUid + fromUid;
+    let groupUID = '';
+
+    try {
+        let groupChat: FirebaseFirestoreTypes.DocumentData;
+
+        groupChat = await (await firestore().collection('messages').doc(groupUid1).collection('messages').get()).query.orderBy('createdAt', 'desc').get();
+        groupUID = groupUid1;
+        if (groupChat.empty) {
+            groupChat = await (await firestore().collection('messages').doc(groupUid2).collection('messages').get()).query.orderBy('createdAt', 'desc').get();
+            groupUID = groupUid2;
+            console.log('groupUid1 not found');
+            if (groupChat.empty) {
+                console.log('groupUid2 not found');
+            }
+        }
+        try {
+            const sent = await firestore().collection('messages').doc(groupUID).update({
+                read: {
+                    user1: { uid: fromUid, read: true },
+                    user2: { uid: toUid, read: false },
+                },
+            });
+            console.log('readMsg Chat : ', sent);
+            return sent;
+        } catch (e) {
+            console.log('error readMsg', e);
+        }
+
+    } catch (e) {
+        console.log('error getMessageByGroupUid : ', e);
     }
 };
 

@@ -2,12 +2,12 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useEffect, useState } from 'react';
 import { useData, useTheme } from '../hooks/';
-import { Block, Input, Text } from '../components/';
+import { Block, Button, Input, Text } from '../components/';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Pressable, StatusBar, StyleSheet } from 'react-native';
+import { Pressable, StatusBar, StyleSheet, Modal, View } from 'react-native';
 import { Avatar, ListItem } from 'react-native-elements';
 import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 import { defaultProfilePic } from '../constants/constants';
@@ -15,13 +15,14 @@ import { Loading } from '../components/Loading';
 import firestore, { } from '@react-native-firebase/firestore';
 import moment from 'moment';
 import { IURecentChat, IUser } from '../constants/types';
-import { GetUserByUid } from '../lib/firebaseProvider';
-// import { useToast } from 'react-native-toast-notifications';
+import { GetUserByUid, readMsg } from '../lib/firebaseProvider';
+// import Dialog, { DialogFooter, DialogButton, DialogContent } from 'react-native-popup-dialog';
 
 const Home = ({ navigation }) => {
   const { colors, sizes } = useTheme();
   const { user } = useData();
   const [isLoading, setLoading] = useState(true);
+  const [isShowPopupDelete, setShowPopupDelete] = useState(false);
   const [isRefresh, setRefresh] = useState(false);
   const [recentChat, setRecentChat] = useState<Array<IURecentChat>>([]);
   // const toast = useToast();
@@ -54,7 +55,6 @@ const Home = ({ navigation }) => {
   };
 
   useEffect(() => {
-    console.log('user tolol: ', user);
     const unsubscribe = firestore().collection('messages').where('users', 'array-contains-any', [user.uid]).onSnapshot(async (querySnapshot) => {
       var data: Array<IURecentChat> = [];
       querySnapshot?.docs.forEach(async (x) => {
@@ -91,6 +91,7 @@ const Home = ({ navigation }) => {
 
   return (
     <Block color={colors.light} flex={1}>
+
       <StatusBar
         animated={true}
         backgroundColor="#ffffff"
@@ -98,6 +99,8 @@ const Home = ({ navigation }) => {
       />
       {/* App Bar */}
       <Block flex={0} paddingHorizontal={sizes.padding} padding={sizes.padding}>
+        <ModalDeleteChat isShowPopupDelete={isShowPopupDelete} setShowPopupDelete={setShowPopupDelete} />
+
         <Block row flex={0} marginTop={StatusBar.currentHeight} justify="space-between" align="center">
           <FontAwesome name="angle-left" size={sizes.icon30} color={colors.white} />
           <Entypo name="dots-three-vertical" size={sizes.icon20} color={colors.icon} />
@@ -152,22 +155,33 @@ const Home = ({ navigation }) => {
               const userData = item.userData;
               if (userData !== undefined) {
                 const indexUser = userData[0].uid === user.uid ? 1 : 0;
+                const isFrom = userData[0].uid === user.uid ? true : false;
                 const userChat = userData[indexUser];
                 var read: boolean = data.read.user1.uid === user.uid ? data.read.user2.read : data.read.user1.read;
                 // const isEnd = index === recentChat.length - 1;
-                return (<ListItem onPress={() => {
-                  const toUser: IUser = {
-                    uid: userChat.uid,
-                    name: userChat.name,
-                    email: userChat.email,
-                    avatar: userChat.avatar,
-                    address: userChat.address,
-                    backgroundImage: userChat.backgroundImage,
-                    website: userChat.website,
-                    token: userChat.token,
-                  };
-                  navigation.push('DetailChat', { toUser: toUser });
-                }} containerStyle={[styles.itemList, { paddingHorizontal: sizes.padding, paddingTop: 10, paddingBottom: 10 }]} >
+                return (<ListItem
+                  onLongPress={() => {
+                    console.log('long pressed');
+                    setShowPopupDelete(true);
+                  }}
+                  onPress={() => {
+                    if (!isFrom) {
+                      readMsg(user.uid.toString(), userChat.uid.toString());
+                    }
+
+                    console.log(data);
+                    const toUser: IUser = {
+                      uid: userChat.uid,
+                      name: userChat.name,
+                      email: userChat.email,
+                      avatar: userChat.avatar,
+                      address: userChat.address,
+                      backgroundImage: userChat.backgroundImage,
+                      website: userChat.website,
+                      token: userChat.token,
+                    };
+                    navigation.push('DetailChat', { toUser: toUser });
+                  }} containerStyle={[styles.itemList, { paddingHorizontal: sizes.padding, paddingTop: 10, paddingBottom: 10 }]} >
                   <Avatar
                     title={userChat.name}
                     size="medium"
@@ -187,7 +201,7 @@ const Home = ({ navigation }) => {
                     <Text color={colors.text}>
                       {moment(data.createdAt).format('hh:mm ddd')}
                     </Text>
-                    <Ionicons name="ios-checkmark-done" size={sizes.icon25} color={read ? colors.info : colors.icon} />
+                    {isFrom ? <Ionicons name="ios-checkmark-done" size={sizes.icon25} color={read ? colors.info : colors.icon} /> : <Entypo name="dot-single" size={sizes.icon30} color={colors.info} />}
                   </Block>
                 </ListItem>);
               } else {
@@ -202,3 +216,61 @@ const Home = ({ navigation }) => {
 };
 
 export default Home;
+
+function ModalDeleteChat({ isShowPopupDelete, setShowPopupDelete }) {
+  const { colors, sizes } = useTheme();
+
+  const styles = StyleSheet.create({
+    itemList: {
+      backgroundColor: colors.light,
+      paddingHorizontal: 0,
+      paddingTop: 0,
+      paddingBottom: 20,
+      margin: 0,
+      padding: 0,
+    },
+    paddingBottom: {
+      paddingBottom: 20,
+    },
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#ecf0f1',
+    },
+    modal: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.secondary,
+      padding: 20,
+      borderRadius: 10,
+      marginHorizontal: 30,
+    },
+  });
+
+  return (<Modal animationType={'fade'} transparent={true} visible={isShowPopupDelete} onRequestClose={() => {
+    console.log('Modal has been closed.');
+  }}>
+    <Block flex={1} center>
+      <View style={styles.modal}>
+        <Text bold size={sizes.p} lineHeight={20} color={colors.text} align="center" marginHorizontal={sizes.m}>
+          Are you sure want to delete this chat?
+        </Text>
+        <Block row flex={0}>
+          <Button radius={sizes.s} color={colors.danger} height={40} marginTop={sizes.spaceInput} marginHorizontal={10} onPress={() => { }}>
+            <Text p transform="capitalize" color={colors.white} bold marginHorizontal={sizes.m}>
+              Delete
+            </Text>
+          </Button>
+          <Button radius={sizes.s} color={colors.primary} height={40} marginTop={sizes.spaceInput} marginHorizontal={10} onPress={() => {
+            setShowPopupDelete(false);
+          }}>
+            <Text p transform="capitalize" color={colors.white} bold marginHorizontal={sizes.m}>
+              Cancel
+            </Text>
+          </Button>
+        </Block>
+      </View>
+    </Block>
+  </Modal>);
+}
