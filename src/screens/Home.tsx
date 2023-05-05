@@ -37,25 +37,24 @@ const Home = ({ navigation }) => {
     return new Promise((resolve) => {
       const x = doc.data();
       // var data: Array<IURecentChat> = [];
-      return GetUserByUid(x.users[0].toString()).then(async (user1) => {
-        return GetUserByUid(x.users[1].toString()).then((user2) => {
-          if (user1 !== undefined && user2 !== undefined) {
-            const userData = [user1, user2];
-            const value: IURecentChat = {
-              data: x,
-              userData: userData,
-            };
-            resolve(value);
-          } else {
-            console.log('user1 and user2 undefined');
-          }
-        });
+      return GetUserByUid(x.toUsers[0].toString()).then(async (toUsers) => {
+        if (toUsers !== undefined) {
+          const userData = toUsers;
+          const value: IURecentChat = {
+            data: x,
+            userData: userData,
+          };
+          resolve(value);
+        } else {
+          console.log('toUsers undefined');
+        }
+
       });
     });
   };
 
   useEffect(() => {
-    const unsubscribe = firestore().collection('messages').where('users', 'array-contains-any', [user.uid]).onSnapshot(async (querySnapshot) => {
+    const unsubscribe = firestore().collection('messages').where('fromUsers', 'array-contains-any', [user.uid]).onSnapshot(async (querySnapshot) => {
       var data: Array<IURecentChat> = [];
       querySnapshot?.docs.forEach(async (x) => {
         var res = await getUsers(x);
@@ -82,6 +81,15 @@ const Home = ({ navigation }) => {
     },
     paddingBottom: {
       paddingBottom: 20,
+    },
+    circle: {
+      width: 20,
+      height: 20,
+      padding: 0,
+      backgroundColor: colors.info,
+      borderRadius: 25,
+      justifyContent: 'center', alignItems: 'center',
+      marginTop: 5,
     },
   });
 
@@ -154,10 +162,11 @@ const Home = ({ navigation }) => {
               const data = item.data;
               const userData = item.userData;
               if (userData !== undefined) {
-                const indexUser = userData[0].uid === user.uid ? 1 : 0;
-                const isFrom = userData[0].uid === user.uid ? true : false;
-                const userChat = userData[indexUser];
-                var read: boolean = data.read.user1.uid === user.uid ? data.read.user2.read : data.read.user1.read;
+                // const indexUser = userData[0].uid === user.uid ? 1 : 0;
+                const isFrom = data.lastChatUID === user.uid ? true : false;
+                const userChat = userData;
+                var read: boolean = data.read;
+                var isOpen: boolean = data.isOpen;
                 // const isEnd = index === recentChat.length - 1;
                 return (<ListItem
                   onLongPress={() => {
@@ -165,8 +174,10 @@ const Home = ({ navigation }) => {
                     setShowPopupDelete(true);
                   }}
                   onPress={() => {
-                    if (!isFrom) {
-                      readMsg(user.uid.toString(), userChat.uid.toString());
+                    if (isFrom) {
+                      readMsg(user.uid.toString(), userChat.uid.toString(), false);
+                    } else {
+                      readMsg(user.uid.toString(), userChat.uid.toString(), true);
                     }
 
                     console.log(data);
@@ -201,14 +212,19 @@ const Home = ({ navigation }) => {
                     <Text color={colors.text}>
                       {moment(data.createdAt).format('hh:mm ddd')}
                     </Text>
-                    {isFrom ? <Ionicons name="ios-checkmark-done" size={sizes.icon25} color={read ? colors.info : colors.icon} /> : <Entypo name="dot-single" size={sizes.icon30} color={colors.info} />}
+                    {isFrom ?
+                      <Ionicons name="ios-checkmark-done" size={sizes.icon25} color={read ? colors.info : colors.icon} /> :
+                      isOpen ? <View /> : <View style={styles.circle}>
+                        <Text color={colors.light} size={10}>{data.unRead}</Text>
+                      </View>
+                    }
                   </Block>
                 </ListItem>);
               } else {
                 return <></>;
               }
             }}
-            keyExtractor={item => item.userData[0].uid.toString() + item.userData[1].uid.toString()}
+            keyExtractor={item => item.data.fromUsers[0].toString() + item.data.toUsers[0].toString()}
           />}
       </Block>
     </Block>

@@ -17,7 +17,7 @@ export interface IUser {
 
 export interface IURecentChat {
   data: FirebaseFirestoreTypes.DocumentData;
-  userData: Array<IUser>;
+  userData: IUser;
 }
 
 export interface IUseData {

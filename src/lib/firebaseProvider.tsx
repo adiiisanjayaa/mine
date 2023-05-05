@@ -5,35 +5,43 @@ import { IUser } from '../constants/types';
 import messaging from '@react-native-firebase/messaging';
 import { serverKey } from '../constants/constants';
 
+//Sign Up
 export const DoSignUp = async (email: string,
     password: string, name: string) => {
     return await auth()
         .createUserWithEmailAndPassword(email, password).then(async (newUser) => {
+            console.log('Success Sign Up : ', newUser);
+            //Save User Data to Firestore
             try { await SaveUser(newUser, name); } catch (error) { return { result: null, error: 'Failed sign up' }; }
             return { result: newUser, error: null };
         }).catch((error) => {
-            console.error(error);
+            console.log('Error Sign Up : ', error);
             var errorMessage = error.message;
             return { result: null, error: errorMessage };
         });
 };
 
+//Sign In
 export const DoSignIn = async (email: string,
     password: string,) => {
     return await auth()
         .signInWithEmailAndPassword(email, password).then((loggedInUser) => {
+            //Update user firebase token
             UpdateUserToken(loggedInUser.user.uid);
+            console.log('Success Sign In : ', loggedInUser);
             return { result: loggedInUser, error: null };
         }).catch((error) => {
-            console.error(error);
+            console.log('Error Sign In : ', error);
             var errorMessage = error.message;
             return { result: null, error: errorMessage };
         });
 };
 
+//Sign Out
 export const DoSignOut = async () => {
     return await auth()
         .signOut().then(() => {
+            //Delete Firebase Token
             messaging().deleteToken();
             return true;
         }).catch((error) => {
@@ -42,6 +50,7 @@ export const DoSignOut = async () => {
         });
 };
 
+//Get Firebase Token
 const getToken = async () => {
     try {
         const token = await firebase.messaging().getToken();
@@ -51,6 +60,7 @@ const getToken = async () => {
     }
 };
 
+//Save User Data to Firestore
 export const SaveUser = (data: FirebaseAuthTypes.UserCredential, name: string) => {
     return getToken().then(async (token) => {
         await firestore().collection('users').doc(data.user.uid).set({
@@ -61,33 +71,22 @@ export const SaveUser = (data: FirebaseAuthTypes.UserCredential, name: string) =
             email: data.user.email,
             avatar: data.user.photoURL,
             backgroundImage: null,
-            chatWith: [],
             token: token,
         });
     });
 };
 
-export const UpdateUserChatWith = async (uid: string, chatWith: string) => {
-    const docRef = firestore().collection('users').doc(uid);
-    return firestore().runTransaction(transaction => {
-        return transaction.get(docRef).then(snapshot => {
-            var largerArray: [string] = snapshot.get('chatWith');
-            if (!largerArray.includes(chatWith)) {
-                largerArray?.push(chatWith);
-                transaction.update(docRef, 'chatWith', largerArray);
-            }
-        });
-    });
-};
-
+//get user by UID
 export const getUserByUid = (uid: string) => {
     return firestore().collection('users').doc(uid).get();
 };
 
+//get all user
 export const getUsers = () => {
     return firestore().collection('users').get();
 };
 
+//update user data
 export const UpdateUser = (data: IUser) => {
     return firestore().collection('users').doc(data.uid.toString()).update({
         name: data.name,
@@ -99,6 +98,7 @@ export const UpdateUser = (data: IUser) => {
     });
 };
 
+//Update User Firebase Token
 export const UpdateUserToken = (uid) => {
     return getToken().then(async (token) => {
         await firestore().collection('users').doc(uid.toString()).update({
@@ -107,6 +107,7 @@ export const UpdateUserToken = (uid) => {
     });
 };
 
+//get user by UID
 export async function GetUserByUid(data: string): Promise<IUser | undefined> {
     return await firestore().collection('users').doc(data.toString()).get().then((doc) => {
         const userChat = doc.data();
@@ -128,105 +129,124 @@ export async function GetUserByUid(data: string): Promise<IUser | undefined> {
     });
 }
 
+//get messages by group UID
 export const getMessageByGroupUid = async (fromUid: string, toUid: string) => {
-    const groupUid1 = fromUid + toUid;
-    const groupUid2 = toUid + fromUid;
-    let groupUID = '';
+    //group UID
+    var groupUid = fromUid + toUid;
 
     try {
         let groupChat: FirebaseFirestoreTypes.DocumentData;
-
-        groupChat = await (await firestore().collection('messages').doc(groupUid1).collection('messages').get()).query.orderBy('createdAt', 'desc').get();
-        groupUID = groupUid1;
-        if (groupChat.empty) {
-            groupChat = await (await firestore().collection('messages').doc(groupUid2).collection('messages').get()).query.orderBy('createdAt', 'desc').get();
-            groupUID = groupUid2;
-            console.log('groupUid1 not found');
-            if (groupChat.empty) {
-                console.log('groupUid2 not found');
-            }
-        }
+        //get message
+        groupChat = await (await firestore().collection('messages').doc(groupUid).collection('messages').get()).query.orderBy('createdAt', 'desc').get();
+        //set data to array
         const data: Array<FirebaseFirestoreTypes.DocumentData> = [];
         groupChat.docs.forEach((doc) => {
             const x = doc.data();
             console.log(doc.id, ' => ', x);
             data.push(x);
         });
-        return { result: data, groupUID: groupUID };
-
+        return { result: data };
     } catch (e) {
         console.log('error getMessageByGroupUid : ', e);
     }
 };
 
-export const sentMessage = async (groupUid: string | undefined, fromUser: IUser, toUser: IUser, content: string, type: string) => {
+//sent message
+export const sentMessage = async (fromUser: IUser, toUser: IUser, content: string, type: string) => {
     const user1 = fromUser.uid.toString();
     const user2 = toUser.uid.toString();
+    var groupUid1 = user1 + user2;
+    var groupUid2 = user2 + user1;
+
     try {
-        const sent = await firestore().collection('messages').doc(groupUid).set({
-            users: [fromUser.uid, toUser.uid],
+        //set data message 1
+        await firestore().collection('messages').doc(groupUid1).set({
+            fromUsers: [fromUser.uid],
+            toUsers: [toUser.uid],
+            lastChatUID: fromUser.uid,
             lastChat: content,
             type: type,
             createdAt: new Date().valueOf(),
-            read: {
-                user1: { uid: user1, read: true },
-                user2: { uid: user2, read: false },
-            },
-            // { fromUser.uid.toString() }: true,
-        }).then(async () => {
-            console.log('sent message...');
-            await firestore().collection('messages').doc(groupUid).collection('messages').add({
-                fromUid: fromUser.uid,
-                toUserUid: toUser.uid,
-                content: content,
-                createdAt: new Date().valueOf(),
-                type: type.toString(),
-            });
-            pushNotification(toUser.token, toUser.name, content, toUser.avatar);
+            read: false,
+            isOpen: true,
+            unRead: 0,
         });
-        console.log('sentMessage Chat : ', sent);
-        return sent;
+        //get current message to get unread
+        await firestore().collection('messages').doc(groupUid2).get().then(async (val) => {
+            let x = val.data();
+            let unReadDoc = 0;
+            if (x !== undefined) {
+                let i = parseInt(x.unRead.toString(), 10);
+                unReadDoc = i + 1;
+                console.log('unread msg ', unReadDoc);
+            }
+            //set data message 2
+            await firestore().collection('messages').doc(groupUid2).set({
+
+                fromUsers: [toUser.uid],
+                toUsers: [fromUser.uid],
+                lastChatUID: fromUser.uid,
+                lastChat: content,
+                type: type,
+                createdAt: new Date().valueOf(),
+                read: true,
+                isOpen: false,
+                unRead: unReadDoc,
+            });
+        });
+
+
+        console.log('sent message...');
+        //set data content message 1
+        await firestore().collection('messages').doc(groupUid1).collection('messages').add({
+            fromUid: fromUser.uid,
+            toUserUid: toUser.uid,
+            content: content,
+            createdAt: new Date().valueOf(),
+            type: type.toString(),
+        });
+        //set data content message 2
+        await firestore().collection('messages').doc(groupUid2).collection('messages').add({
+            fromUid: fromUser.uid,
+            toUserUid: toUser.uid,
+            content: content,
+            createdAt: new Date().valueOf(),
+            type: type.toString(),
+        });
+        pushNotification(toUser.token, toUser.name, content, toUser.avatar);
     } catch (e) {
         console.log('errorSentMessage', e);
     }
 };
 
-export const readMsg = async (fromUid: string, toUid: string) => {
-    const groupUid1 = fromUid + toUid;
-    const groupUid2 = toUid + fromUid;
-    let groupUID = '';
+//read message
+export const readMsg = async (fromUid: string, toUid: string, isToOpen: boolean) => {
+    let groupUID1 = fromUid + toUid;
+    let groupUID2 = toUid + fromUid;
 
     try {
-        let groupChat: FirebaseFirestoreTypes.DocumentData;
-
-        groupChat = await (await firestore().collection('messages').doc(groupUid1).collection('messages').get()).query.orderBy('createdAt', 'desc').get();
-        groupUID = groupUid1;
-        if (groupChat.empty) {
-            groupChat = await (await firestore().collection('messages').doc(groupUid2).collection('messages').get()).query.orderBy('createdAt', 'desc').get();
-            groupUID = groupUid2;
-            console.log('groupUid1 not found');
-            if (groupChat.empty) {
-                console.log('groupUid2 not found');
-            }
-        }
-        try {
-            const sent = await firestore().collection('messages').doc(groupUID).update({
-                read: {
-                    user1: { uid: fromUid, read: true },
-                    user2: { uid: toUid, read: false },
-                },
+        if (isToOpen) {
+            await firestore().collection('messages').doc(groupUID1).update({
+                isOpen: true,
+                unRead: 0,
+                read: true,
             });
-            console.log('readMsg Chat : ', sent);
-            return sent;
-        } catch (e) {
-            console.log('error readMsg', e);
+            await firestore().collection('messages').doc(groupUID2).update({
+                read: true,
+            });
+        } else {
+            await firestore().collection('messages').doc(groupUID2).update({
+                read: true,
+            });
         }
 
+        console.log('readMsg Chat');
     } catch (e) {
         console.log('error getMessageByGroupUid : ', e);
     }
 };
 
+//Push Notification
 export const pushNotification = async (to: string | undefined, from: string | undefined, message: string, photoUrl: string | undefined) => {
     console.log('Notification Data: ', from, message, photoUrl, to);
     await fetch('https://fcm.googleapis.com/fcm/send', {
@@ -249,9 +269,10 @@ export const pushNotification = async (to: string | undefined, from: string | un
     }).then((response) => { console.log(response); });
 };
 
+//Get Recent Chat
 export const getRecentChat = async (user: IUser) => {
     try {
-        return firestore().collection('messages').where('users', 'array-contains-any', [user]).onSnapshot((querySnapshot) => {
+        return firestore().collection('messages').where('fromUsers', 'array-contains-any', [user]).onSnapshot((querySnapshot) => {
             const threads = querySnapshot.docs.map((documentSnapshot) => {
                 return {
                     _id: documentSnapshot.id,

@@ -25,7 +25,6 @@ const DetailChat = ({ navigation }) => {
   const { colors, sizes } = useTheme();
   const route = useRoute<RouteProp<StackParamsList, 'DetailChat'>>();
   const [isLoading, setLoading] = useState(true);
-  const [currentGroupUID, setCurrentGroupUID] = useState<string>();
   const [toUser, setToUser] = useState<IUser>();
   const [messages, setMessages] = useState<Array<FirebaseFirestoreTypes.DocumentData>>();
   const { user } = useData();
@@ -61,7 +60,6 @@ const DetailChat = ({ navigation }) => {
   const getMessages = (fromUid: string, toUid: string) => {
     getMessageByGroupUid(fromUid.toString(), toUid.toString()).then((res) => {
       setMessages(res?.result);
-      setCurrentGroupUID(res?.groupUID);
       console.log('message: ', res);
     });
   };
@@ -69,7 +67,7 @@ const DetailChat = ({ navigation }) => {
   const sentNewMessage = (message: string) => {
     const fromUid = user.uid;
     const toUid = route.params !== undefined ? route.params.toUser.uid : '';
-    sentMessage(currentGroupUID, user, route.params.toUser, message, typeChat.text.toString()).then(() => {
+    sentMessage(user, route.params.toUser, message, typeChat.text.toString()).then(() => {
       getMessages(fromUid.toString(), toUid.toString());
       reset();
     });
