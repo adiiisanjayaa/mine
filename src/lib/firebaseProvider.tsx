@@ -81,6 +81,15 @@ export const getUserByUid = (uid: string) => {
     return firestore().collection('users').doc(uid).get();
 };
 
+//delete chat by uid
+export const deleteChatByUID = async (uid: string) => {
+    var colRef = firestore().collection('messages').doc(uid).collection('messages');
+    await colRef.get().then((querySnapshot) => {
+        Promise.all(querySnapshot.docs.map((d) => d.ref.delete()));
+    });
+    await firestore().collection('messages').doc(uid).delete();
+};
+
 //get all user
 export const getUsers = () => {
     return firestore().collection('users').get();
@@ -170,9 +179,18 @@ export const sentMessage = async (fromUser: IUser, toUser: IUser, content: strin
             read: false,
             isOpen: true,
             unRead: 0,
+        }).then(async () => {
+            //set data content message 1
+            await firestore().collection('messages').doc(groupUid1).collection('messages').add({
+                fromUid: fromUser.uid,
+                toUserUid: toUser.uid,
+                content: content,
+                createdAt: new Date().valueOf(),
+                type: type.toString(),
+            });
         });
         //get current message to get unread
-        await firestore().collection('messages').doc(groupUid2).get().then(async (val) => {
+        firestore().collection('messages').doc(groupUid2).get().then(async (val) => {
             let x = val.data();
             let unReadDoc = 0;
             if (x !== undefined) {
@@ -193,25 +211,15 @@ export const sentMessage = async (fromUser: IUser, toUser: IUser, content: strin
                 isOpen: false,
                 unRead: unReadDoc,
             });
-        });
 
-
-        console.log('sent message...');
-        //set data content message 1
-        await firestore().collection('messages').doc(groupUid1).collection('messages').add({
-            fromUid: fromUser.uid,
-            toUserUid: toUser.uid,
-            content: content,
-            createdAt: new Date().valueOf(),
-            type: type.toString(),
-        });
-        //set data content message 2
-        await firestore().collection('messages').doc(groupUid2).collection('messages').add({
-            fromUid: fromUser.uid,
-            toUserUid: toUser.uid,
-            content: content,
-            createdAt: new Date().valueOf(),
-            type: type.toString(),
+            //set data content message 2
+            await firestore().collection('messages').doc(groupUid2).collection('messages').add({
+                fromUid: fromUser.uid,
+                toUserUid: toUser.uid,
+                content: content,
+                createdAt: new Date().valueOf(),
+                type: type.toString(),
+            });
         });
         pushNotification(toUser.token, toUser.name, content, toUser.avatar);
     } catch (e) {

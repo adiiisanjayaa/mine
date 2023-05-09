@@ -78,21 +78,25 @@ const Contacts = ({ navigation }) => {
           data={contact}
           alwaysBounceVertical={true}
           bounces={true}
-          renderItem={({ item, index }) => {
+          renderItem={({ item }) => {
             if (contact === undefined) { return <></>; }
-            const isEnd = index === contact.length - 1;
-            return (<ListItem onPress={() => {
-              const toUser: IUser = {
-                uid: item.uid,
-                name: item.name,
-                email: item.email,
-                avatar: item.avatar,
-                address: item.address,
-                backgroundImage: item.backgroundImage,
-                website: item.website,
-              };
-              navigation.push('DetailChat', { toUser: toUser });
-            }} containerStyle={[styles.itemList, { paddingHorizontal: sizes.padding, paddingTop: 10, paddingBottom: isEnd ? 100 : 10 }]} >
+            // const isEnd = index === contact.length - 1;
+            return (<ListItem
+              onPress={() => {
+                const toUser: IUser = {
+                  uid: item.uid,
+                  name: item.name,
+                  email: item.email,
+                  avatar: item.avatar,
+                  address: item.address,
+                  backgroundImage: item.backgroundImage,
+                  website: item.website,
+                };
+                navigation.push('DetailChat', { toUser: toUser });
+              }}
+              containerStyle={
+                [styles.itemList, { paddingHorizontal: sizes.padding, paddingTop: 10, paddingBottom: 10 }]
+              } >
               <Avatar
                 title={item.name}
                 size="medium"

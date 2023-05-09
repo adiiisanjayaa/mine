@@ -2,10 +2,10 @@
 import React, { useState } from 'react';
 import { useTheme } from '../hooks';
 import { Block, Button, Input, Text } from '../components';
-import { Pressable, StatusBar, StyleSheet } from 'react-native';
+import { Alert, Pressable, StatusBar, StyleSheet } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { ScrollView } from 'react-native-gesture-handler';
-import Toast from 'react-native-simple-toast';
+// import Toast from 'react-native-simple-toast';
 import { ErrorMessage } from '@hookform/error-message';
 import { ActivityIndicator } from 'react-native';
 import Helper from '../utility/helper';
@@ -34,7 +34,8 @@ const SignUp = ({ navigation }) => {
           setLoading(false);
           if (signUpResult.result != null) {
             console.log('User account created & signed in!', signUpResult.result);
-            Toast.showWithGravity('Success, User account created', Toast.LONG, Toast.TOP);
+            // Toast.showWithGravity('Success, User account created', Toast.LONG, Toast.TOP);
+            Alert.alert('Success register user',);
             navigation.pop();
           } else {
             setError('registerInput', { type: 'custom', message: signUpResult.error });

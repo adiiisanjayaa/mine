@@ -2,21 +2,26 @@
 import React, { useState } from 'react';
 import { useTheme } from '../hooks';
 import { Block, Button, Input, Text } from '../components';
-import { ActivityIndicator, Pressable, StatusBar, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StatusBar, View } from 'react-native';
 import { Avatar, Image } from 'react-native-elements';
 import { useForm } from 'react-hook-form';
 import { StyleSheet } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useData } from '../hooks';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { DoSignOut } from '../lib/firebaseProvider';
-import Toast from 'react-native-simple-toast';
+// import Toast from 'react-native-simple-toast';
 import { defaultProfilePic } from '../constants/constants';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 const Profile = ({ navigation }) => {
   const { colors, sizes } = useTheme();
   const { user, updateUser } = useData();
   const [isLoading, setLoading] = useState(false);
+  const [avatarData, setAvatarData] = useState('');
+  const includeExtra = true;
+
   const {
     control,
     handleSubmit,
@@ -33,7 +38,7 @@ const Profile = ({ navigation }) => {
 
   const onSubmit = async (data) => {
     if (isValid) {
-      console.log('submited ', data);
+      console.log('Update Profile : ', data);
       setLoading(true);
       await updateUser({
         uid: user.uid,
@@ -75,9 +80,10 @@ const Profile = ({ navigation }) => {
     },
     profileImage: {
       height: 100,
-      width: '100%',
+      width: 100,
       position: 'absolute',
       bottom: -50,
+      alignSelf: 'center',
     },
     header: {
       width: '100%',
@@ -92,6 +98,18 @@ const Profile = ({ navigation }) => {
       alignItems: 'center',
       justifyContent: 'center',
       borderRadius: 5,
+    },
+    editIcon: {
+      backgroundColor: colors.primary,
+      justifyContent: 'center', alignItems: 'center',
+      borderRadius: 50,
+      width: 30,
+      height: 30,
+      position: 'absolute',
+      right: 0,
+      bottom: 0,
+      borderColor: 'white',
+      borderWidth: 3,
     },
   });
 
@@ -110,24 +128,42 @@ const Profile = ({ navigation }) => {
             <Pressable onPress={async () => {
               const signOut = await DoSignOut();
               if (signOut) {
-                Toast.showWithGravity('Success, signed out', Toast.LONG, Toast.BOTTOM);
+                // Toast.showWithGravity('Success, signed out', Toast.LONG, Toast.BOTTOM);
+                Alert.alert('Signed out',);
                 navigation.reset({
                   index: 0,
                   routes: [{ name: 'SignIn' }],
                 });
               } else {
-                Toast.showWithGravity('Failed, sign out', Toast.LONG, Toast.BOTTOM);
+                // Toast.showWithGravity('Failed, sign out', Toast.LONG, Toast.BOTTOM);
+                Alert.alert('Failed sign out',);
               }
             }}>
               <Block style={styles.logout}><MaterialIcons name="logout" size={sizes.icon25} color={colors.white} /></Block>
             </Pressable>
           </Block>
-          <Block center={true} flex={0} row style={styles.profileImage} >
+          <Block center={true} flex={1} row style={styles.profileImage} >
             <Avatar
               size={100}
               rounded={true}
-              source={user.avatar !== null && user.avatar !== '' ? { uri: user.avatar } : defaultProfilePic}
+              source={user.avatar !== null && user.avatar !== '' ? { uri: user.avatar } : avatarData !== '' ? { uri: avatarData } : defaultProfilePic}
             />
+            <Pressable onPress={async () => {
+              const result = await launchImageLibrary({
+                selectionLimit: 0,
+                mediaType: 'photo',
+                includeBase64: false,
+                includeExtra,
+              },);
+              if (result.assets !== undefined) {
+                console.log('result image library : ', result.assets[0].uri);
+                if (result.assets[0].uri !== undefined) {
+                  setAvatarData(result.assets[0].uri);
+                }
+              }
+            }}>
+              <Block style={styles.editIcon}><Ionicons name="camera" size={15} color={colors.white} /></Block>
+            </Pressable>
           </Block>
         </View>
 

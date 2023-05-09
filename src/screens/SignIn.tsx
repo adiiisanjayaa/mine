@@ -2,11 +2,11 @@
 import React, { useState } from 'react';
 import { useData, useTheme } from '../hooks';
 import { Block, Button, Input, Text } from '../components';
-import { ActivityIndicator, Pressable, StatusBar, StyleSheet } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StatusBar, StyleSheet } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { ScrollView } from 'react-native-gesture-handler';
 import Helper from '../utility/helper';
-import Toast from 'react-native-simple-toast';
+// import Toast from 'react-native-simple-toast';
 import { ErrorMessage } from '@hookform/error-message';
 import { DoSignIn } from '../lib/firebaseProvider';
 
@@ -45,7 +45,8 @@ const SignIn = ({ navigation }) => {
               backgroundImage: '',
             });
 
-            Toast.showWithGravity('Success, User account signed in', Toast.LONG, Toast.TOP);
+            // Toast.showWithGravity('Success, User account signed in', Toast.LONG, Toast.TOP);
+            Alert.alert('Logging In',);
             navigation.reset({
               index: 0,
               routes: [{ name: 'Root' }],

@@ -12,7 +12,8 @@ import {
 import { light } from '../constants';
 import { getUserByUid, UpdateUser } from '../lib/firebaseProvider';
 import auth from '@react-native-firebase/auth';
-import Toast from 'react-native-simple-toast';
+import { Alert } from 'react-native';
+// import Toast from 'react-native-simple-toast';
 
 export const DataContext = React.createContext({});
 
@@ -76,11 +77,13 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
         try {
           await UpdateUser(payload).then(() => {
             init();
-            Toast.showWithGravity('Success update profile', Toast.LONG, Toast.BOTTOM);
+            // Toast.showWithGravity('Success update profile', Toast.LONG, Toast.BOTTOM);
+            Alert.alert('Profile updated',);
           });
         } catch (err) {
           console.log('failed update user', err);
-          Toast.showWithGravity('Failed, update profile', Toast.LONG, Toast.BOTTOM);
+          // Toast.showWithGravity('Failed, update profile', Toast.LONG, Toast.BOTTOM);
+          Alert.alert('Failed update profile',);
         }
       }
     };

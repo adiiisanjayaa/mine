@@ -15,7 +15,7 @@ import { Loading } from '../components/Loading';
 import firestore, { } from '@react-native-firebase/firestore';
 import moment from 'moment';
 import { IURecentChat, IUser } from '../constants/types';
-import { GetUserByUid, readMsg } from '../lib/firebaseProvider';
+import { GetUserByUid, readMsg, deleteChatByUID } from '../lib/firebaseProvider';
 // import Dialog, { DialogFooter, DialogButton, DialogContent } from 'react-native-popup-dialog';
 
 const Home = ({ navigation }) => {
@@ -23,6 +23,7 @@ const Home = ({ navigation }) => {
   const { user } = useData();
   const [isLoading, setLoading] = useState(true);
   const [isShowPopupDelete, setShowPopupDelete] = useState(false);
+  const [currentGroupUID, setCurrentGroupUID] = useState('');
   const [isRefresh, setRefresh] = useState(false);
   const [recentChat, setRecentChat] = useState<Array<IURecentChat>>([]);
   // const toast = useToast();
@@ -53,20 +54,31 @@ const Home = ({ navigation }) => {
     });
   };
 
-  useEffect(() => {
-    const unsubscribe = firestore().collection('messages').where('fromUsers', 'array-contains-any', [user.uid]).onSnapshot(async (querySnapshot) => {
+  const getMsg = () => {
+    return firestore().collection('messages').where('fromUsers', 'array-contains-any', [user.uid]).onSnapshot(async (querySnapshot) => {
       var data: Array<IURecentChat> = [];
-      querySnapshot?.docs.forEach(async (x) => {
-        var res = await getUsers(x);
-        data.push(res as IURecentChat);
-        console.log('***', data.length);
-        if (querySnapshot?.docs.length === data.length) {
-          setRecentChat(data);
-        }
-      });
+
+      if (querySnapshot?.docs.length > 0) {
+        querySnapshot?.docs.forEach(async (x) => {
+          var res = await getUsers(x);
+          data.push(res as IURecentChat);
+          console.log('***', data.length);
+          if (querySnapshot?.docs.length === data.length) {
+            setRecentChat(data);
+            console.log(recentChat);
+          }
+        });
+      } else {
+        setRecentChat([]);
+      }
+
       setLoading(false);
     });
-    return () => unsubscribe();
+  };
+
+  useEffect(() => {
+    const unsubscribe = getMsg();
+    return () => (unsubscribe)();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -83,8 +95,8 @@ const Home = ({ navigation }) => {
       paddingBottom: 20,
     },
     circle: {
-      width: 20,
-      height: 20,
+      width: 23,
+      height: 23,
       padding: 0,
       backgroundColor: colors.info,
       borderRadius: 25,
@@ -107,7 +119,11 @@ const Home = ({ navigation }) => {
       />
       {/* App Bar */}
       <Block flex={0} paddingHorizontal={sizes.padding} padding={sizes.padding}>
-        <ModalDeleteChat isShowPopupDelete={isShowPopupDelete} setShowPopupDelete={setShowPopupDelete} />
+        <ModalDeleteChat
+          isShowPopupDelete={isShowPopupDelete}
+          setShowPopupDelete={setShowPopupDelete}
+          groupUID={currentGroupUID}
+        />
 
         <Block row flex={0} marginTop={StatusBar.currentHeight} justify="space-between" align="center">
           <FontAwesome name="angle-left" size={sizes.icon30} color={colors.white} />
@@ -172,6 +188,7 @@ const Home = ({ navigation }) => {
                   onLongPress={() => {
                     console.log('long pressed');
                     setShowPopupDelete(true);
+                    setCurrentGroupUID(user.uid.toString() + userChat.uid.toString());
                   }}
                   onPress={() => {
                     if (isFrom) {
@@ -214,9 +231,11 @@ const Home = ({ navigation }) => {
                     </Text>
                     {isFrom ?
                       <Ionicons name="ios-checkmark-done" size={sizes.icon25} color={read ? colors.info : colors.icon} /> :
-                      isOpen ? <View /> : <View style={styles.circle}>
-                        <Text color={colors.light} size={10}>{data.unRead}</Text>
-                      </View>
+                      isOpen ?
+                        <View /> :
+                        <View style={styles.circle}>
+                          <Text color={colors.light} size={10}>{data.unRead}</Text>
+                        </View>
                     }
                   </Block>
                 </ListItem>);
@@ -233,7 +252,7 @@ const Home = ({ navigation }) => {
 
 export default Home;
 
-function ModalDeleteChat({ isShowPopupDelete, setShowPopupDelete }) {
+function ModalDeleteChat({ isShowPopupDelete, setShowPopupDelete, groupUID }) {
   const { colors, sizes } = useTheme();
 
   const styles = StyleSheet.create({
@@ -273,7 +292,17 @@ function ModalDeleteChat({ isShowPopupDelete, setShowPopupDelete }) {
           Are you sure want to delete this chat?
         </Text>
         <Block row flex={0}>
-          <Button radius={sizes.s} color={colors.danger} height={40} marginTop={sizes.spaceInput} marginHorizontal={10} onPress={() => { }}>
+          <Button
+            radius={sizes.s}
+            color={colors.danger}
+            height={40}
+            marginTop={sizes.spaceInput}
+            marginHorizontal={10}
+            onPress={async () => {
+              setShowPopupDelete(false);
+              await deleteChatByUID(groupUID);
+            }}
+          >
             <Text p transform="capitalize" color={colors.white} bold marginHorizontal={sizes.m}>
               Delete
             </Text>
